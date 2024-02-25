@@ -179,7 +179,7 @@ app.get(API_ROOT +'/feed/:type/:id?', cache(ttl), (req, res) => {
 				msg = 'Collection loaded.';
 			break;
 			case 'collections':
-				sql = 'SELECT * FROM collections ORDER BY name ASC';
+				sql = 'SELECT * FROM collections ORDER BY label ASC';
 				msg = 'Collections loaded.';
 			break;
 		}
