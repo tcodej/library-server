@@ -1,0 +1,37 @@
+{
+  "name": "library-server",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Central server for my various apps.",
+  "main": "index.cjs",
+  "scripts": {
+    "dev": "nodemon index.cjs",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tcodej/library-server.git"
+  },
+  "author": "Trent Johnson",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tcodej/library-server/issues"
+  },
+  "homepage": "https://github.com/tcodej/library-server#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-http-proxy": "^2.0.0",
+    "fs": "0.0.1-security",
+    "memory-cache": "^0.2.0",
+    "music-metadata": "^8.1.4",
+    "mysql2": "^3.6.5",
+    "node-fetch": "^3.3.2",
+    "nodemon": "^3.1.0",
+    "path": "^0.12.7",
+    "serve-favicon": "^2.5.0"
+  }
+}
+
+
