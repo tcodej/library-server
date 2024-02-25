@@ -280,7 +280,7 @@ const shuffle = (arr) => {
 const getURL = (req, path) => {
 	const host = req.header('Host');
 
-	return `${PROTOCOL}://${host}/api/mp3/`+ encodeURIComponent(path);
+	return `${PROTOCOL}://${host}/api/musicbin/mp3/`+ encodeURIComponent(path);
 }
 
 const getMeta = async (pathReq, subset) => {
