@@ -6,7 +6,7 @@
   "main": "index.cjs",
   "scripts": {
     "dev": "nodemon index.cjs",
-    "prod": "node index.cjs & ngrok http --domain=bold-wondrous-midge.ngrok-free.app 3000",
+    "prod": "stmux -w always -e ERROR -m beep,system -- [ [ \"node index.cjs\" .. \"ngrok http --domain=bold-wondrous-midge.ngrok-free.app 3000\" ] ]",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -31,8 +31,7 @@
     "node-fetch": "^3.3.2",
     "nodemon": "^3.1.0",
     "path": "^0.12.7",
-    "serve-favicon": "^2.5.0"
+    "serve-favicon": "^2.5.0",
+    "stmux": "^1.8.7"
   }
 }
-
-
