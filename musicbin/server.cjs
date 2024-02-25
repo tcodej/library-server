@@ -20,7 +20,7 @@ const ttl = 300;
 const disableCache = false;
 
 // requires dotenv in index.cjs to populate this
-const { MP3_PATH, CDG_PATH } = process.env;
+const { MP3_PATH, CDG_PATH, PROTOCOL, HOST } = process.env;
 
 const cache = (duration) => {
 	return (req, res, next) => {
