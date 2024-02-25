@@ -6,6 +6,7 @@
   "main": "index.cjs",
   "scripts": {
     "dev": "nodemon index.cjs",
+    "prod": "node index.cjs & ngrok http --domain=bold-wondrous-midge.ngrok-free.app 3000",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
