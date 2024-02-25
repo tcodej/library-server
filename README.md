@@ -1,4 +1,4 @@
-# mediabin-server
+# library-server
 Central server for my various apps.
 
 ## Notes to self:
