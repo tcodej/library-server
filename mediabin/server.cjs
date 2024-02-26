@@ -182,6 +182,10 @@ app.get(API_ROOT +'/feed/:type/:id?', cache(ttl), (req, res) => {
 				sql = 'SELECT * FROM collections ORDER BY label ASC';
 				msg = 'Collections loaded.';
 			break;
+			case 'dupes':
+				sql = 'SELECT * FROM (SELECT *, COUNT(*) OVER (PARTITION BY title) AS dupes FROM media) AS items WHERE items.dupes > 1';
+				msg = 'Dupe search complete.';
+			break;
 		}
 
 		const resp = await db.query(sql);
@@ -253,12 +257,12 @@ const saveCover = (release) => {
 const saveRelease = (release) => {
 	console.log(`Saving ${release.id} to the database.`);
 	let media = {
-		artist: release.artists && release.artists[0].name,
-		title: release.title,
+		artist: release.artists && addSlashes(release.artists[0].name),
+		title: addSlashes(release.title),
 		released: release.released || release.year,
-		label: release.labels && release.labels[0].name,
+		label: release.labels && addSlashes(release.labels[0].name),
 		release_id: release.id,
-		format: release.formats[0].name +', '+ release.formats[0].descriptions.join(', '),
+		format: addSlashes(release.formats[0].name +', '+ release.formats[0].descriptions.join(', ')),
 		catalog_number: release.labels && release.labels[0].catno,
 		source: 'discogs'
 	}
