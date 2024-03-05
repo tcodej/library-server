@@ -72,7 +72,7 @@ app.get(API_ROOT +'/discogs/collection/:page', (req, res) => {
 // load a discogs release by id and import it
 // it does not check if the release already exists...
 app.get(API_ROOT +'/discogs/import/:id', (req, res) => {
-	const { type, id} = req.params;
+	const { id } = req.params;
 	const url = `${discogsAPI}/releases/${id}?token=${DISCOGS_TOKEN}`;
 
 	(async () => {
@@ -82,11 +82,20 @@ app.get(API_ROOT +'/discogs/import/:id', (req, res) => {
 		});
 
 		const resp = await response.json();
+		const row = await saveRelease(resp);
+		saveCover(resp);
 
-		// save to db
-		saveRelease(resp);
+		let message = '';
 
-		res.json(resp);
+		if (row && row.ok) {
+			message = 'Release saved.';
+		}
+
+		res.json({
+			ok: message ? true : false,
+			message: message,
+			response: resp
+		});
 	})();
 });
 
@@ -234,27 +243,44 @@ const saveCover = (release) => {
 						fs.writeFile(path.join(dirPath, fileName), buffer, (err) => {
 							if (err) {
 								console.error(err);
+								return {
+									ok: false,
+									message: 'Image file save failed'
+								};
 
 							} else {
 								console.log('Cover for '+ release.id +' downloaded successfully');
 								item.cover = fileName;
 								db.update(item);
+
+								return {
+									ok: true,
+									message: 'Cover for '+ release.id +' downloaded successfully'
+								};
 							}
 						});
 					})
 
 					.catch((error) => {
 						console.error(error);
+						return {
+							ok: false,
+							message: 'Error saving cover image'
+						};
 					});
 			}
 		});
 
 	} else {
 		console.log('No release_id');
+		return {
+			ok: false,
+			message: 'No release_id available'
+		}
 	}
 }
 
-const saveRelease = (release) => {
+const saveRelease = async (release) => {
 	console.log(`Saving ${release.id} to the database.`);
 	let media = {
 		artist: release.artists && addSlashes(release.artists[0].name),
@@ -267,7 +293,11 @@ const saveRelease = (release) => {
 		source: 'discogs'
 	}
 
-	db.insert(media);
+	const row = await db.insert(media);
+	return {
+		ok: (row && row.insertId) ? true : false,
+		response: row
+	}
 }
 
 // get a database entry by discogs release_id

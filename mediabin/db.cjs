@@ -43,7 +43,7 @@ exports.update = async (data) => {
 	const sql = db.format(`UPDATE media SET cover='${data.cover}' WHERE id=${data.id}`);
 
 	if (data.id) {
-		rows = await db.execute(sql);
+		[rows] = await db.execute(sql);
 
 	} else {
 		console.log('No id for db update');
@@ -56,7 +56,7 @@ exports.update = async (data) => {
 
 exports.insert = async (data) => {
 	const db = await openConnection();
-	let rows = [];
+	let resp = {};
 	let inserts = [];
 	let values = []
 	let sql = 'INSERT INTO media ';
@@ -69,9 +69,9 @@ exports.insert = async (data) => {
 	sql += `(${inserts.join(', ')}) VALUES (${values.join(', ')})`;
 
 	const statement = db.format(sql);
-	rows = await db.execute(statement);
+	[resp] = await db.execute(statement);
 	await db.end();
 
-	return rows.length === 1 ? rows[0] : rows;
+	return resp;
 }
 
