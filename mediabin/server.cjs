@@ -1,9 +1,9 @@
 const express = require('express');
 const mcache = require('memory-cache');
-// const fetch = require('node-fetch');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const fs = require('fs');
 const path = require('path');
+const https = require('https');
 const db = require('./db.cjs');
 
 const app = express();
@@ -227,6 +227,7 @@ const saveCover = (release) => {
 	let imageURL;
 	const dirPath = __dirname +'/files/covers';
 	const fileName = `${release.id}.jpg`;
+	const filePath = path.join(dirPath, fileName);
 
 	if (release.images && release.images.length > 0) {
 		imageURL = release.images[0].uri150;
@@ -236,47 +237,27 @@ const saveCover = (release) => {
 		getMediaItem(release.id).then(item => {
 			// only save if the item doesn't already have a cover image
 			if (!item.cover && imageURL) {
-				fetch(imageURL)
-					.then((response) => response.buffer())
-					.then((buffer) => {
-						// Write the buffer to a file
-						fs.writeFile(path.join(dirPath, fileName), buffer, (err) => {
-							if (err) {
-								console.error(err);
-								return {
-									ok: false,
-									message: 'Image file save failed'
-								};
+				const file = fs.createWriteStream(filePath);
 
-							} else {
-								console.log('Cover for '+ release.id +' downloaded successfully');
-								item.cover = fileName;
-								db.update(item);
+				https.get(imageURL, response => {
+					response.pipe(file);
 
-								return {
-									ok: true,
-									message: 'Cover for '+ release.id +' downloaded successfully'
-								};
-							}
-						});
-					})
-
-					.catch((error) => {
-						console.error(error);
-						return {
-							ok: false,
-							message: 'Error saving cover image'
-						};
+					file.on('finish', () => {
+						file.close();
+						console.log(`Image downloaded as ${fileName}`);
+						item.cover = fileName;
+						db.update(item);
 					});
+
+				}).on('error', err => {
+					fs.unlink(filePath);
+					console.error(`Error downloading image: ${err.message}`);
+				});
 			}
 		});
 
 	} else {
 		console.log('No release_id');
-		return {
-			ok: false,
-			message: 'No release_id available'
-		}
 	}
 }
 
