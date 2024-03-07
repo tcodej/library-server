@@ -50,7 +50,7 @@ app.get('/', (req, res) => {
 // utility endpoint to aid in troubleshooting
 app.get(API_ROOT +'/clearcache', (req, res) => {
 	mcache.clear();
-	res.send('Cache cleared.');
+	res.send({ message: 'Cache cleared' });
 });
 
 app.get(API_ROOT +'/browse/*', cache(ttl), (req, res) => {
