@@ -20,8 +20,12 @@ app.get('/', (req, res) => {
 	res.send('Library Server v1.0');
 });
 
-app.get(API_ROOT +'/healthcheck', (req, res) => {
+app.get('/healthcheck', (req, res) => {
 	res.send({ message: 'I LIVE' });
+});
+
+app.get('/coffee', (req, res) => {
+	res.status(418).send(`I'm a teapot`);
 });
 
 app.listen(PORT, () => {
