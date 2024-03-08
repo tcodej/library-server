@@ -67,7 +67,7 @@ app.get(API_ROOT +'/browse/*', cache(ttl), (req, res) => {
 		}
 
 		list.forEach((item) => {
-			if (isFolder(p.join(MP3_PATH, pathReq, item))) {
+			if (isDir(p.join(MP3_PATH, pathReq, item))) {
 				result.folders.push(item);
 
 			} else {
@@ -220,26 +220,32 @@ app.get(API_ROOT +'/random/albums/:num', (req, res) => {
 
 	(async () => {
 		for await (const artist of artists) {
-			// randomize album folders
-			const albumList = shuffle(fs.readdirSync(p.join(MP3_PATH, artist)));
-			// choose the first randomized album folder
-			const path = p.join(MP3_PATH, artist, albumList[0]);
+			const itemPath = p.join(MP3_PATH, artist);
 
-			if (isFolder(path)) {
-				// randomize files inside the folder
-				const fileList = shuffle(fs.readdirSync(path));
-				// get album meta based on file
-				const meta = await getMeta(p.join(artist, albumList[0], fileList[0]), true);
+			if (isDir(itemPath)) {
+				// randomize album folders
+				const albumList = shuffle(fs.readdirSync(itemPath));
+				// choose the first randomized album folder
+				const path = p.join(MP3_PATH, artist, albumList[0]);
 
-				if (meta.ok) {
-					meta.path = p.join(artist, albumList[0]);
-					result.push(meta);
+				if (isDir(path)) {
+					// randomize files inside the folder
+					const fileList = shuffle(fs.readdirSync(path));
+					// get album meta based on file
+					const meta = await getMeta(p.join(artist, albumList[0], fileList[0]), true);
 
-					// stop iterating if we've reached our limit
-					if (result.length == req.params.num) {
-						break;
+					if (meta.ok) {
+						meta.path = p.join(artist, albumList[0]);
+						result.push(meta);
+
+						// stop iterating if we've reached our limit
+						if (result.length == req.params.num) {
+							break;
+						}
 					}
 				}
+			} else {
+				console.log('Not a folder: '+ itemPath);
 			}
 		}
 
@@ -339,7 +345,7 @@ const getMeta = async (pathReq, subset) => {
 }
 
 // requires a fully qualified path
-const isFolder = (path) => {
+const isDir = (path) => {
 	const stats = fs.lstatSync(path);
 
 	return stats.isDirectory() ? true : false;
