@@ -54,4 +54,4 @@ app.use(YOKIE, yokie);
 app.use(YOKIE +'/cdg', express.static(CDG_PATH));
 
 app.use(TRACKER, tracker);
-app.use(TRACKER +'/maps', express.static('./tracker/files/gpx'));
+app.use(TRACKER +'/gpx', express.static('./tracker/files/gpx'));
