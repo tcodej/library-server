@@ -1,5 +1,7 @@
 const express = require('express');
 const db = require('./db.cjs');
+const fs = require('fs');
+const p = require('path');
 
 const app = express();
 
@@ -103,21 +105,46 @@ app.post(API_ROOT +'/saveNote', (req, res) => {
 	})();
 });
 
+app.get(API_ROOT +'/routes/get', (req, res) => {
+	try {
+		const list = fs.readdirSync(__dirname +'/files/gpx');
+		let response = {
+			message: '',
+			result: [],
+			total: 0
+		};
+
+		// Cycle-20120718-1941-53950.gpx
+		list.forEach((item) => {
+			const [type, date, time] = item.split('-');
+			// type - date - time - ?
+			let data = {
+				type: type.toLowerCase(),
+				date: date,
+				time: time,
+				datetime: date.substr(0, 4) +'-'+ date.substr(4, 2) +'-'+ date.substr(6, 2) +'T'+ time.substr(0, 2) +':'+ time.substr(2, 2),
+				file: item
+			}
+			response.result.push(data);
+		});
+
+		response.total = response.result.length;
+		response.message = 'Routes loaded.';
+
+		res.json(response);
+
+	} catch (err) {
+		console.log(err);
+		res.status(404).json({
+			ok: false,
+			error: err.message
+		});
+	}
+});
 
 
 console.log('Tracker Server is available.');
 
-
-const addSlashes = (str) => {
-    return str.replace(/\\/g, '\\\\')
-		.replace(/\u0008/g, '\\b')
-		.replace(/\t/g, '\\t')
-		.replace(/\n/g, '\\n')
-		.replace(/\f/g, '\\f')
-		.replace(/\r/g, '\\r')
-		.replace(/'/g, '\\\'')
-		.replace(/"/g, '\\"');
-}
 
 const saveLocation = async (data) => {
 	console.log(`Saving location to the database.`);
