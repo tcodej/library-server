@@ -37,12 +37,19 @@ exports.query = async (statement, data) => {
 	return rows.length === 1 ? rows[0] : rows;
 }
 
-exports.update = async (data) => {
+exports.update = async (id, data) => {
 	const db = await openConnection();
 	let rows = [];
-	const sql = db.format(`UPDATE media SET cover='${data.cover}' WHERE id=${data.id}`);
+	let updates = [];
 
-	if (data.id) {
+	for (const [key, value] of Object.entries(data)) {
+		updates.push(`${key}='${value}'`);
+	}
+
+	const sql = db.format(`UPDATE media SET ${updates.join(',')} WHERE id=${id}`);
+	console.log(sql);
+
+	if (id) {
 		[rows] = await db.execute(sql);
 
 	} else {

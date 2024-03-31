@@ -207,6 +207,24 @@ app.get(API_ROOT +'/feed/:type/:id?', cache(ttl), (req, res) => {
 	})();
 });
 
+app.post(API_ROOT +'/updateReleaseCollection/:id', (req, res) => {
+	getMediaItem(req.params.id).then(item => {
+		db.update(item.id, req.body).then(row => {
+			let message = '';
+
+			if (row) {
+				message = 'Release saved.';
+			}
+
+			res.json({
+				message: message,
+				result: row
+			});
+		});
+	});
+});
+
+
 console.log('MediaBin Server is available.');
 console.log(`Cache is ${disableCache ? 'disabled' : 'enabled'}`);
 
@@ -245,8 +263,7 @@ const saveCover = (release) => {
 					file.on('finish', () => {
 						file.close();
 						console.log(`Image downloaded as ${fileName}`);
-						item.cover = fileName;
-						db.update(item);
+						db.update(item.id, { cover: fileName });
 					});
 
 				}).on('error', err => {
@@ -262,6 +279,26 @@ const saveCover = (release) => {
 }
 
 const saveRelease = async (release) => {
+	console.log(`Saving ${release.id} to the database.`);
+	let media = {
+		artist: release.artists && addSlashes(release.artists[0].name),
+		title: addSlashes(release.title),
+		released: release.released || release.year,
+		label: release.labels && addSlashes(release.labels[0].name),
+		release_id: release.id,
+		format: addSlashes(release.formats[0].name +', '+ release.formats[0].descriptions.join(', ')),
+		catalog_number: release.labels && release.labels[0].catno,
+		source: 'discogs'
+	}
+
+	const row = await db.insert(media);
+	return {
+		ok: (row && row.insertId) ? true : false,
+		response: row
+	}
+}
+
+const updateMedia = async (release) => {
 	console.log(`Saving ${release.id} to the database.`);
 	let media = {
 		artist: release.artists && addSlashes(release.artists[0].name),
