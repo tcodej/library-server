@@ -120,14 +120,14 @@ app.get(API_ROOT +'/routes/get', (req, res) => {
 			// type - date - time - ?
 			let data = {
 				type: type.toLowerCase(),
-				date: date,
-				time: time,
 				datetime: date.substr(0, 4) +'-'+ date.substr(4, 2) +'-'+ date.substr(6, 2) +'T'+ time.substr(0, 2) +':'+ time.substr(2, 2),
 				file: item
 			}
+
 			response.result.push(data);
 		});
 
+		sort(response.result, 'datetime', 'desc');
 		response.total = response.result.length;
 		response.message = 'Routes loaded.';
 
@@ -156,6 +156,47 @@ const saveLocation = async (data) => {
 		response: row
 	}
 }
+
+/**
+ * Helper function to sort an array of objects by chosen key
+ */
+const sort = (arr, key, dir) => {
+    try {
+        arr.sort(function(a, b) {
+            if (key) {
+                a = a[key];
+                b = b[key];
+            }
+
+            if (dir === 'desc') {
+	            if (a.toLowerCase() < b.toLowerCase()) {
+	                return 1;
+	            }
+
+	            if (a.toLowerCase() > b.toLowerCase()) {
+	                return -1;
+	            }
+
+            } else {
+	            if (a.toLowerCase() < b.toLowerCase()) {
+	                return -1;
+	            }
+
+	            if (a.toLowerCase() > b.toLowerCase()) {
+	                return 1;
+	            }
+	        }
+
+            return 0;
+        });
+
+        return arr;
+
+    } catch (err) {
+        console.log('sort failed', arr, key);
+    }
+}
+
 
 
 module.exports = app;
