@@ -132,6 +132,12 @@ app.post(API_ROOT +'/feed/:type', (req, res) => {
 				msg = 'Singers loaded.';
 			break;
 
+			// Return all songs (for the booklet view)
+			case 'all':
+				sql = `SELECT id, artist, title FROM songs ORDER BY artist ASC`;
+				msg = 'All songs loaded.';
+			break;
+
 			// Return 20 random songs
 			case 'random':
 				sql = `SELECT * FROM songs ORDER BY RAND() ASC LIMIT 20`;
