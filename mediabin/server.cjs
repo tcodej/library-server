@@ -71,8 +71,8 @@ app.get(API_ROOT +'/discogs/collection/:page', (req, res) => {
 
 // load a discogs release by id and import it
 // it does not check if the release already exists...
-app.get(API_ROOT +'/discogs/import/:id', (req, res) => {
-	const { id } = req.params;
+app.get(API_ROOT +'/discogs/import/:id/:imageOnly?', (req, res) => {
+	const { id, imageOnly } = req.params;
 	const url = `${discogsAPI}/releases/${id}?token=${DISCOGS_TOKEN}`;
 
 	(async () => {
@@ -82,13 +82,18 @@ app.get(API_ROOT +'/discogs/import/:id', (req, res) => {
 		});
 
 		const resp = await response.json();
-		const row = await saveRelease(resp);
-		saveCover(resp);
-
 		let message = '';
 
-		if (row && row.ok) {
-			message = 'Release saved.';
+		if (!imageOnly) {
+			const row = await saveRelease(resp);
+			saveCover(resp);
+
+			if (row && row.ok) {
+				message = 'Release saved.';
+			}
+		} else {
+			saveCover(resp, true);
+			message = 'Cover image saved.';
 		}
 
 		res.json({
@@ -241,7 +246,7 @@ const addSlashes = (str) => {
 		.replace(/"/g, '\\"');
 }
 
-const saveCover = (release) => {
+const saveCover = (release, forceSave) => {
 	let imageURL;
 	const dirPath = __dirname +'/files/covers';
 	const fileName = `${release.id}.jpg`;
@@ -254,7 +259,7 @@ const saveCover = (release) => {
 	if (release.id) {
 		getMediaItem(release.id).then(item => {
 			// only save if the item doesn't already have a cover image
-			if (!item.cover && imageURL) {
+			if ((!item.cover && imageURL) || forceSave === true) {
 				const file = fs.createWriteStream(filePath);
 
 				https.get(imageURL, response => {
