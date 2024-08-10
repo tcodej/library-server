@@ -225,7 +225,7 @@ app.get(API_ROOT +'/feed/:type/:id?', cache(ttl), (req, res) => {
 
 app.post(API_ROOT +'/updateReleaseCollection/:id', (req, res) => {
 	getMediaItem(req.params.id).then(item => {
-		db.update(req.params.id, req.body).then(row => {
+		db.update(item.id, req.body).then(row => {
 			let message = '';
 
 			if (row) {
