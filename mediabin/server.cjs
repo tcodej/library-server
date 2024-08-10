@@ -59,8 +59,8 @@ app.get(API_ROOT +'/discogs/collection/:page', (req, res) => {
 
 	(async () => {
 		const response = await fetch(url, {
-		    method: 'GET',
-		    headers: { 'Content-Type': 'application/json' }
+			method: 'GET',
+			headers: { 'Content-Type': 'application/json' }
 		});
 
 		const resp = await response.json();
@@ -77,8 +77,8 @@ app.get(API_ROOT +'/discogs/import/:id/:imageOnly?', (req, res) => {
 
 	(async () => {
 		const response = await fetch(url, {
-		    method: 'GET',
-		    headers: { 'Content-Type': 'application/json' }
+			method: 'GET',
+			headers: { 'Content-Type': 'application/json' }
 		});
 
 		const resp = await response.json();
@@ -112,16 +112,27 @@ app.get(API_ROOT +'/discogs/:type/:id', (req, res) => {
 	const url = `${discogsAPI}/${type}/${id}?token=${DISCOGS_TOKEN}`;
 
 	(async () => {
-		const response = await fetch(url, {
-		    method: 'GET',
-		    headers: { 'Content-Type': 'application/json' }
-		});
+		let resp = {};
 
-		const resp = await response.json();
+		try {
+			const response = await fetch(url, {
+				method: 'GET',
+				headers: { 'Content-Type': 'application/json' }
+			});
 
-		if (type === 'releases') {
-			// check to see if a cover image needs to be downloaded
-			saveCover(resp);
+			resp = await response.json();
+
+			if (type === 'releases') {
+				// check to see if a cover image needs to be downloaded
+				saveCover(resp);
+			}
+
+		} catch(err) {
+			resp = {
+				ok: false,
+				error: true,
+				message: `Discogs ${type} API failed`
+			}
 		}
 
 		res.json(resp);
@@ -214,7 +225,7 @@ app.get(API_ROOT +'/feed/:type/:id?', cache(ttl), (req, res) => {
 
 app.post(API_ROOT +'/updateReleaseCollection/:id', (req, res) => {
 	getMediaItem(req.params.id).then(item => {
-		db.update(item.id, req.body).then(row => {
+		db.update(req.params.id, req.body).then(row => {
 			let message = '';
 
 			if (row) {
@@ -236,7 +247,7 @@ console.log(`Cache is ${disableCache ? 'disabled' : 'enabled'}`);
 
 
 const addSlashes = (str) => {
-    return str.replace(/\\/g, '\\\\')
+	return str.replace(/\\/g, '\\\\')
 		.replace(/\u0008/g, '\\b')
 		.replace(/\t/g, '\\t')
 		.replace(/\n/g, '\\n')
