@@ -48,9 +48,22 @@ app.get('/', (req, res) => {
 });
 
 // utility endpoint to aid in troubleshooting
-app.get(API_ROOT +'/clearcache', (req, res) => {
+app.get(API_ROOT +'/cache/clear', (req, res) => {
 	mcache.clear();
 	res.send({ message: 'Cache cleared' });
+});
+
+// memory cache stats
+app.get(API_ROOT +'/cache/stats', (req, res) => {
+	const result = {
+		message: 'Stats loaded',
+		size: mcache.size(),
+		memsize: mcache.memsize(),
+		hits: mcache.hits(),
+		misses: mcache.misses()
+	};
+
+	res.send(result);
 });
 
 app.get(API_ROOT +'/browse/*', cache(ttl), (req, res) => {

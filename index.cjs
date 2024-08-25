@@ -7,6 +7,7 @@ const musicbin = require('./musicbin/server.cjs');
 const mediabin = require('./mediabin/server.cjs');
 const yokie = require('./yokie/server.cjs');
 const tracker = require('./tracker/server.cjs');
+const assetbin = require('./assetbin/server.cjs');
 
 const app = express();
 
@@ -43,6 +44,7 @@ const MUSIC_BIN = API_ROOT +'/musicbin';
 const MEDIA_BIN = API_ROOT +'/mediabin';
 const YOKIE = API_ROOT +'/yokie';
 const TRACKER = API_ROOT +'/tracker';
+const ASSET_BIN = API_ROOT +'/assetbin';
 
 app.use(MUSIC_BIN, musicbin);
 app.use(MUSIC_BIN +'/mp3', express.static(MP3_PATH));
@@ -55,3 +57,6 @@ app.use(YOKIE +'/cdg', express.static(CDG_PATH));
 
 app.use(TRACKER, tracker);
 app.use(TRACKER +'/gpx', express.static('./tracker/files/gpx'));
+
+app.use(ASSET_BIN, assetbin);
+app.use(ASSET_BIN +'/pics', express.static('./assetbin/files/pics'));
