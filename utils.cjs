@@ -1,7 +1,6 @@
 // shared utilities
 
 exports.addSlashes = (str) => {
-	console.log('slash', str);
 	if (typeof str !== 'string') {
 		return str;
 	}

@@ -4,6 +4,7 @@ const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fet
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
+const Jimp = require('jimp');
 const db = require('./db.cjs');
 const utils = require('../utils.cjs');
 
@@ -144,15 +145,26 @@ LEFT JOIN locations ON assets.location_id=locations.id ${orderBy}`;
 
 app.post(API_ROOT +'/update/:id?', (req, res) => {
 	// if id is present, it's an update, otherwise insert new
-	console.log('--- update', req.body);
+	// console.log('--- update', req.body);
 
 	(async () => {
+		let image_data = false;
+
+		if (req.body.image_data) {
+			image_data = req.body.image_data;
+			delete req.body.image_data;
+		}
+
 		if (req.body.id) {
 			db.update(req.body.id, req.body).then(row => {
 				let message = '';
 
 				if (row) {
 					message = 'Asset updated';
+
+					if (image_data) {
+						savePhoto(image_data, req.body.id);
+					}
 				}
 
 				res.json({
@@ -164,14 +176,38 @@ app.post(API_ROOT +'/update/:id?', (req, res) => {
 		} else {
 			const row = await db.insert(req.body);
 
-			return {
+			if (image_data && row.insertId) {
+				savePhoto(image_data, row.insertId);
+			}
+
+			res.json({
 				ok: (row && row.insertId) ? true : false,
 				message: 'Asset created',
 				response: row
-			}
+			});
 		}
 	})();
 });
+
+const savePhoto = (image_data, id) => {
+	if (!id) {
+		id = '_no_id';
+	}
+
+	const [ type, data ] = image_data.split(',');
+	console.log(data);
+	const dirPath = __dirname +'/files/photos';
+	const fileName = `${id}.jpg`;
+	const filePath = path.join(dirPath, fileName);
+	const buffer = Buffer.from(data, 'base64');
+
+	console.log('saving photo '+ filePath);
+
+	Jimp.read(buffer, (err, res) => {
+		if (err) throw new Error(err);
+		res.quality(95).write(filePath);
+	});
+}
 
 
 console.log('AssetBin Server is available.');
