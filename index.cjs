@@ -15,7 +15,7 @@ const { CORS_ORIGINS, PROTOCOL, PORT, MP3_PATH, CDG_PATH } = process.env;
 const API_ROOT = '/api';
 
 app.use(cors({ origin: CORS_ORIGINS.split(',') }));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.use(favicon('./favicon.ico'));
 
 app.get('/', (req, res) => {
@@ -59,4 +59,4 @@ app.use(TRACKER, tracker);
 app.use(TRACKER +'/gpx', express.static('./tracker/files/gpx'));
 
 app.use(ASSET_BIN, assetbin);
-app.use(ASSET_BIN +'/pics', express.static('./assetbin/files/pics'));
+app.use(ASSET_BIN +'/photos', express.static('./assetbin/files/photos'));

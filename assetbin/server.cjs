@@ -191,21 +191,24 @@ app.post(API_ROOT +'/update/:id?', (req, res) => {
 
 const savePhoto = (image_data, id) => {
 	if (!id) {
-		id = '_no_id';
+		console.log('id required to save photo');
+		return;
 	}
 
 	const [ type, data ] = image_data.split(',');
-	console.log(data);
+	const now = new Date();
 	const dirPath = __dirname +'/files/photos';
-	const fileName = `${id}.jpg`;
+	const fileName = `${id}_${now.getTime()}.jpg`;
 	const filePath = path.join(dirPath, fileName);
 	const buffer = Buffer.from(data, 'base64');
 
-	console.log('saving photo '+ filePath);
-
 	Jimp.read(buffer, (err, res) => {
 		if (err) throw new Error(err);
-		res.quality(95).write(filePath);
+		res
+			.cover(640, 480)
+			.quality(80)
+			.write(filePath);
+		db.update(id, { photo: fileName });
 	});
 }
 
