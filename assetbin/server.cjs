@@ -143,8 +143,8 @@ LEFT JOIN locations ON assets.location_id=locations.id ${orderBy}`;
 	})();
 });
 
+// if id is present, it's an update, otherwise insert a new row
 app.post(API_ROOT +'/update/:id?', (req, res) => {
-	// if id is present, it's an update, otherwise insert new
 	// console.log('--- update', req.body);
 
 	(async () => {
@@ -163,6 +163,8 @@ app.post(API_ROOT +'/update/:id?', (req, res) => {
 					message = 'Asset updated';
 
 					if (image_data) {
+						// delete prev photo if it exists
+						deletePhoto(req.body.id);
 						savePhoto(image_data, req.body.id);
 					}
 				}
@@ -189,6 +191,27 @@ app.post(API_ROOT +'/update/:id?', (req, res) => {
 	})();
 });
 
+app.get(API_ROOT +'/delete/:id', (req, res) => {
+	(async () => {
+		try {
+			const del = await deletePhoto(req.params.id);
+			const resp = await db.query(`DELETE FROM assets WHERE id=${req.params.id}`);
+
+			res.json({
+				message: 'Asset deleted.',
+				result: []
+			});
+
+		} catch (err) {
+			console.log(err);
+			res.status(500).json({
+				message: err.sqlMessage || 'Database error',
+				result: []
+			});
+		}
+	})();
+});
+
 const savePhoto = (image_data, id) => {
 	if (!id) {
 		console.log('id required to save photo');
@@ -205,11 +228,29 @@ const savePhoto = (image_data, id) => {
 	Jimp.read(buffer, (err, res) => {
 		if (err) throw new Error(err);
 		res
-			.cover(640, 480)
+			.contain(640, 480)
 			.quality(80)
 			.write(filePath);
 		db.update(id, { photo: fileName });
 	});
+}
+
+// get asset data and delete photo file if present
+const deletePhoto = async (id) => {
+	const resp = await db.query(`SELECT * FROM assets WHERE id=${id}`);
+
+	console.log(resp);
+
+	// delete associated photo file
+	if (resp && resp.photo) {
+		const dirPath = __dirname +'/files/photos';
+		const filePath = path.join(dirPath, resp.photo);
+
+		fs.unlink(filePath, (err) => {
+			// fail silently
+			console.log(err);
+		});
+	}
 }
 
 
