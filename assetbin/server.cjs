@@ -119,6 +119,10 @@ LEFT JOIN locations ON assets.location_id=locations.id ${orderBy}`;
 				sql = 'SELECT * FROM categories ORDER BY name ASC';
 				msg = 'Categories loaded.';
 			break;
+			case 'subcategories':
+				sql = 'SELECT * FROM subcategories ORDER BY category_id ASC, name ASC';
+				msg = 'Subcategories loaded.';
+			break;
 			case 'locations':
 				sql = 'SELECT * FROM locations ORDER BY name ASC';
 				msg = 'Locations loaded.';
