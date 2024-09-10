@@ -109,7 +109,7 @@ app.get(API_ROOT +'/feed/:type/:id?', (req, res) => {
 				sql = `SELECT assets.*, categories.name AS category, subcategories.name AS subcategory, locations.name as location FROM assets
 LEFT JOIN categories ON assets.category_id=categories.id
 LEFT JOIN subcategories ON assets.subcategory_id=subcategories.id
-LEFT JOIN locations ON assets.location_id=locations.id ${orderBy}`;
+LEFT JOIN locations ON assets.location_id=locations.id`;
 				msg = 'Asset list loaded.';
 			break;
 			case 'category':
