@@ -2,6 +2,8 @@ const express = require('express');
 const fs = require('fs');
 const p = require('path');
 const mcache = require('memory-cache');
+const chalk = require('chalk');
+
 let mm;
 
 (async () => {
@@ -21,6 +23,11 @@ const disableCache = false;
 
 // requires dotenv in index.cjs to populate this
 const { MP3_PATH, CDG_PATH, PROTOCOL, HOST } = process.env;
+
+const log = (str) => {
+	const color = chalk.hex('#2776FF');
+	console.log(color('[Musicbin] '+ str));
+}
 
 const cache = (duration) => {
 	return (req, res, next) => {
@@ -141,12 +148,12 @@ app.get(API_ROOT +'/browse/*', cache(ttl), (req, res) => {
 				}
 			}
 
-			// console.log(result);
+			// log(result);
 			res.json(result);
 		})();
 
 	} catch (err) {
-		console.log(err);
+		log(err);
 		res.status(404).json({
 			ok: false,
 			error: err.message
@@ -200,7 +207,7 @@ app.get(API_ROOT +'/meta/folder/*', cache(ttl), (req, res) => {
 		}
 
 	} catch(err) {
-		console.log(err);
+		log(err);
 		res.status(500).json({
 			ok: false,
 			error: err.message
@@ -258,7 +265,7 @@ app.get(API_ROOT +'/random/albums/:num', (req, res) => {
 					}
 				}
 			} else {
-				console.log('Not a folder: '+ itemPath);
+				log('Not a folder: '+ itemPath);
 			}
 		}
 
@@ -283,8 +290,8 @@ app.get(API_ROOT +'/random/tracks/:num', (req, res) => {
 });
 
 // app.listen(PORT, () => {
-	console.log(`MusicBin server is available.`);
-	console.log(`MP3_PATH is ${MP3_PATH}`);
+	log('MusicBin server is available.');
+	log(`MP3_PATH is ${MP3_PATH}`);
 // });
 
 const shuffle = (arr) => { 
@@ -333,7 +340,7 @@ const getMeta = async (pathReq, subset) => {
 			return common;
 
 		} else {
-			console.log(filePath, 'not a valid music file');
+			log(filePath, 'not a valid music file');
 			return {
 				ok: false,
 				path: filePath,
@@ -342,7 +349,7 @@ const getMeta = async (pathReq, subset) => {
 		}
 
 	} catch (err) {
-		console.log(err);
+		log(err);
 		return {
 			ok: false,
 			path: filePath,

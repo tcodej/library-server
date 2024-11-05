@@ -2,12 +2,18 @@ const express = require('express');
 const db = require('./db.cjs');
 const fs = require('fs');
 const p = require('path');
+const chalk = require('chalk');
 
 const app = express();
 
 // requires dotenv in index.cjs to populate this
 const { PROTOCOL, PORT } = process.env;
 const API_ROOT = '';
+
+const log = (str) => {
+	const color = chalk.hex('#207581');
+	console.log(color('[Tracker] '+ str));
+}
 
 app.get('/', (req, res) => {
 	res.send('Tracker Server v1.0');
@@ -68,7 +74,6 @@ app.post(API_ROOT +'/saveLocation', (req, res) => {
 
 app.post(API_ROOT +'/deleteLocation', (req, res) => {
 	(async () => {
-		console.log(req.body);
 		const { id } = req.body;
 		const row = await db.delete(id);
 
@@ -134,7 +139,7 @@ app.get(API_ROOT +'/routes/get', (req, res) => {
 		res.json(response);
 
 	} catch (err) {
-		console.log(err);
+		log(err);
 		res.status(404).json({
 			ok: false,
 			error: err.message
@@ -143,11 +148,11 @@ app.get(API_ROOT +'/routes/get', (req, res) => {
 });
 
 
-console.log('Tracker Server is available.');
+log('Tracker Server is available.');
 
 
 const saveLocation = async (data) => {
-	console.log(`Saving location to the database.`);
+	log(`Saving location to the database.`);
 
 	const row = await db.insert(data);
 
@@ -193,7 +198,7 @@ const sort = (arr, key, dir) => {
         return arr;
 
     } catch (err) {
-        console.log('sort failed', arr, key);
+        log('sort failed', arr, key);
     }
 }
 

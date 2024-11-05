@@ -1,11 +1,18 @@
 const express = require('express');
+const chalk = require('chalk');
 const db = require('./db.cjs');
+const utils = require('../utils.cjs');
 
 const app = express();
 
 // requires dotenv in index.cjs to populate this
 const { PROTOCOL, PORT, CDG_PATH } = process.env;
 const API_ROOT = '';
+
+const log = (str) => {
+	const color = chalk.hex('#E3E700');
+	console.log(color('[Yokie] '+ str));
+}
 
 app.get('/', (req, res) => {
 	res.send('Yokie Server v1.0');
@@ -73,7 +80,7 @@ app.post(API_ROOT +'/search', (req, res) => {
 		let terms = [];
 
 		// escape characters
-		q = addSlashes(req.body.query);
+		q = utils.addSlashes(req.body.query);
 		sql = `SELECT * FROM songs WHERE `;
 
 		['artist', 'title'].forEach((column) => {
@@ -233,24 +240,7 @@ app.get(API_ROOT +'/queue/remove', (req, res) => {
 	res.json({ ok: true });
 });
 
-
-
-
-
-console.log('Yokie Server is available.');
-console.log(`CDG_PATH is ${CDG_PATH}`);
-
-
-
-const addSlashes = (str) => {
-    return str.replace(/\\/g, '\\\\')
-		.replace(/\u0008/g, '\\b')
-		.replace(/\t/g, '\\t')
-		.replace(/\n/g, '\\n')
-		.replace(/\f/g, '\\f')
-		.replace(/\r/g, '\\r')
-		.replace(/'/g, '\\\'')
-		.replace(/"/g, '\\"');
-}
+log('Yokie Server is available.');
+log(`CDG_PATH is ${CDG_PATH}`);
 
 module.exports = app;

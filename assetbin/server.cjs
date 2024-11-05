@@ -1,9 +1,8 @@
 const express = require('express');
 const mcache = require('memory-cache');
-const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+const chalk = require('chalk');
 const fs = require('fs');
 const path = require('path');
-const https = require('https');
 const Jimp = require('jimp');
 const db = require('./db.cjs');
 const utils = require('../utils.cjs');
@@ -17,6 +16,11 @@ const ttl = 1440;
 const disableCache = false;
 
 const API_ROOT = '';
+
+const log = (str) => {
+	const color = chalk.hex('#FF9600');
+	console.log(color('[Assetbin] '+ str));
+}
 
 const cache = (duration) => {
 	return (req, res, next) => {
@@ -150,7 +154,7 @@ LEFT JOIN locations ON assets.location_id=locations.id`;
 
 // if id is present, it's an update, otherwise insert a new row
 app.post(API_ROOT +'/update/:id?', (req, res) => {
-	// console.log('--- update', req.body);
+	// log('--- update', req.body);
 
 	(async () => {
 		let image_data = false;
@@ -208,7 +212,7 @@ app.get(API_ROOT +'/delete/:id', (req, res) => {
 			});
 
 		} catch (err) {
-			console.log(err);
+			log(err);
 			res.status(500).json({
 				message: err.sqlMessage || 'Database error',
 				result: []
@@ -219,7 +223,7 @@ app.get(API_ROOT +'/delete/:id', (req, res) => {
 
 const savePhoto = (image_data, id) => {
 	if (!id) {
-		console.log('id required to save photo');
+		log('id required to save photo');
 		return;
 	}
 
@@ -244,7 +248,7 @@ const savePhoto = (image_data, id) => {
 const deletePhoto = async (id) => {
 	const resp = await db.query(`SELECT * FROM assets WHERE id=${id}`);
 
-	console.log(resp);
+	log(resp);
 
 	// delete associated photo file
 	if (resp && resp.photo) {
@@ -253,13 +257,12 @@ const deletePhoto = async (id) => {
 
 		fs.unlink(filePath, (err) => {
 			// fail silently
-			console.log(err);
+			log(err);
 		});
 	}
 }
 
-
-console.log('AssetBin Server is available.');
-console.log(`Cache is ${disableCache ? 'disabled' : 'enabled'}`);
+log('AssetBin Server is available.');
+log(`Cache is ${disableCache ? 'disabled' : 'enabled'}`);
 
 module.exports = app;

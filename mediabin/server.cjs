@@ -1,5 +1,6 @@
 const express = require('express');
 const mcache = require('memory-cache');
+const chalk = require('chalk');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const fs = require('fs');
 const path = require('path');
@@ -18,6 +19,11 @@ const disableCache = false;
 const { DISCOGS_TOKEN, DISCOGS_USERNAME } = process.env;
 const API_ROOT = '';
 const discogsAPI = 'https://api.discogs.com';
+
+const log = (str) => {
+	const color = chalk.hex('#88FBFF');
+	console.log(color('[Mediabin] '+ str));
+}
 
 const cache = (duration) => {
 	return (req, res, next) => {
@@ -241,8 +247,8 @@ app.post(API_ROOT +'/updateReleaseCollection/:id', (req, res) => {
 });
 
 
-console.log('MediaBin Server is available.');
-console.log(`Cache is ${disableCache ? 'disabled' : 'enabled'}`);
+log('MediaBin Server is available.');
+log(`Cache is ${disableCache ? 'disabled' : 'enabled'}`);
 
 
 
@@ -278,7 +284,7 @@ const saveCover = (release, forceSave) => {
 
 					file.on('finish', () => {
 						file.close();
-						console.log(`Image downloaded as ${fileName}`);
+						log(`Image downloaded as ${fileName}`);
 						db.update(item.id, { cover: fileName });
 					});
 
@@ -290,12 +296,12 @@ const saveCover = (release, forceSave) => {
 		});
 
 	} else {
-		console.log('No release_id');
+		log('No release_id');
 	}
 }
 
 const saveRelease = async (release) => {
-	console.log(`Saving ${release.id} to the database.`);
+	log(`Saving ${release.id} to the database.`);
 	let media = {
 		artist: release.artists && addSlashes(release.artists[0].name),
 		title: addSlashes(release.title),
@@ -315,7 +321,7 @@ const saveRelease = async (release) => {
 }
 
 const updateMedia = async (release) => {
-	console.log(`Saving ${release.id} to the database.`);
+	log(`Saving ${release.id} to the database.`);
 	let media = {
 		artist: release.artists && addSlashes(release.artists[0].name),
 		title: addSlashes(release.title),
