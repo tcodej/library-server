@@ -13,7 +13,7 @@ const app = express();
 const ttl = 1440;
 
 // use for debugging
-const disableCache = false;
+const disableCache = true;
 
 // requires dotenv in index.cjs to populate this
 const { DISCOGS_TOKEN, DISCOGS_USERNAME } = process.env;
@@ -192,6 +192,7 @@ app.get(API_ROOT +'/feed/:type/:id?', cache(ttl), (req, res) => {
 	let msg = '';
 	const select = 'SELECT * FROM media';
 	const orderBy = 'ORDER BY artist ASC, released ASC, title ASC';
+	const notwantlist = 'wantlist=0';
 
 	(async () => {
 		switch (req.params.type) {
@@ -202,11 +203,11 @@ app.get(API_ROOT +'/feed/:type/:id?', cache(ttl), (req, res) => {
 			break;
 			// all media
 			case 'media':
-				sql = `${select} ${orderBy}`;
+				sql = `${select} WHERE ${notwantlist} ${orderBy}`;
 				msg = 'Media list loaded.';
 			break;
 			case 'collection':
-				sql = `${select} WHERE collection_id=${req.params.id} ${orderBy}`;
+				sql = `${select} WHERE collection_id=${req.params.id} AND ${notwantlist} ${orderBy}`;
 				msg = 'Collection loaded.';
 			break;
 			case 'collections':
@@ -216,6 +217,11 @@ app.get(API_ROOT +'/feed/:type/:id?', cache(ttl), (req, res) => {
 			case 'dupes':
 				sql = 'SELECT * FROM (SELECT *, COUNT(*) OVER (PARTITION BY title) AS dupes FROM media) AS items WHERE items.dupes > 1';
 				msg = 'Dupe search complete.';
+			break;
+			// Items that I don't currently own but want to find
+			case 'wantlist':
+				sql = `${select} WHERE wantlist=1`;
+				msg = 'Wantlist loaded.';
 			break;
 		}
 
@@ -236,6 +242,23 @@ app.post(API_ROOT +'/updateReleaseCollection/:id', (req, res) => {
 
 			if (row) {
 				message = 'Release saved.';
+			}
+
+			res.json({
+				message: message,
+				result: row
+			});
+		});
+	});
+});
+
+app.post(API_ROOT +'/updateWantlist/:id', (req, res) => {
+	getMediaItem(req.params.id).then(item => {
+		db.update(item.id, req.body).then(row => {
+			let message = '';
+
+			if (row) {
+				message = 'Wantlist saved.';
 			}
 
 			res.json({
