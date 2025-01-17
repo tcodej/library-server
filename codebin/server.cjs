@@ -52,7 +52,7 @@ app.get(API_ROOT +'/feed/:type/:id?', (req, res) => {
 
 		} catch (err) {
 			res.status(500).json({
-				message: 'Database error',
+				message: err,
 				result: []
 			});
 		}
