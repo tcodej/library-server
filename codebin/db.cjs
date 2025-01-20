@@ -83,6 +83,13 @@ exports.insert = async (data) => {
 }
 
 exports.delete = async (id) => {
-	
-}
+	const db = await openConnection();
+	let resp = {};
+	let sql = `DELETE FROM messages WHERE id=${id}`;
 
+	const statement = db.format(sql);
+	[resp] = await db.execute(statement);
+	await db.end();
+
+	return resp;
+}

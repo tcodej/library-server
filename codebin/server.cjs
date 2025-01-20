@@ -93,8 +93,7 @@ app.post(API_ROOT +'/update/:id?', (req, res) => {
 app.get(API_ROOT +'/delete/:id', (req, res) => {
 	(async () => {
 		try {
-			const del = await deletePhoto(req.params.id);
-			const resp = await db.query(`DELETE FROM messages WHERE id=${req.params.id}`);
+			const resp = await db.delete(req.params.id);
 
 			res.json({
 				message: 'Message deleted.',
