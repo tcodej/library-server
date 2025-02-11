@@ -276,6 +276,10 @@ log(`Cache is ${disableCache ? 'disabled' : 'enabled'}`);
 
 
 const addSlashes = (str) => {
+	if (!str) {
+		return '';
+	}
+
 	return str.replace(/\\/g, '\\\\')
 		.replace(/\u0008/g, '\\b')
 		.replace(/\t/g, '\\t')
