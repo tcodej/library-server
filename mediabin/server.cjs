@@ -329,7 +329,7 @@ const saveRelease = async (release) => {
 		artist: release.artists && addSlashes(release.artists[0].name),
 		title: addSlashes(release.title),
 		released: release.released || release.year,
-		label: release.labels && addSlashes(release.labels[0].name),
+		label: release.labels && addSlashes(release.labels[0]?.name),
 		release_id: release.id,
 		format: addSlashes(release.formats[0].name +', '+ release.formats[0].descriptions.join(', ')),
 		catalog_number: release.labels && release.labels[0].catno,

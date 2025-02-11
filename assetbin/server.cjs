@@ -110,10 +110,11 @@ app.get(API_ROOT +'/feed/:type/:id?', (req, res) => {
 			break;
 			// all assets
 			case 'assets':
-				sql = `SELECT assets.*, categories.name AS category, subcategories.name AS subcategory, locations.name as location FROM assets
+				sql = `SELECT assets.*, categories.name AS category, subcategories.name AS subcategory, locations.name AS location, photos.file AS file FROM assets
 LEFT JOIN categories ON assets.category_id=categories.id
 LEFT JOIN subcategories ON assets.subcategory_id=subcategories.id
-LEFT JOIN locations ON assets.location_id=locations.id`;
+LEFT JOIN locations ON assets.location_id=locations.id
+LEFT JOIN photos ON assets.photo_id=photos.id ORDER BY assets.name ASC`;
 				msg = 'Asset list loaded.';
 			break;
 			case 'category':
@@ -131,6 +132,10 @@ LEFT JOIN locations ON assets.location_id=locations.id`;
 			case 'locations':
 				sql = 'SELECT * FROM locations ORDER BY name ASC';
 				msg = 'Locations loaded.';
+			break;
+			case 'photos':
+				sql = `SELECT * FROM photos WHERE asset_id=${req.params.id}`;
+				msg = 'Photos loaded.';
 			break;
 		}
 
@@ -173,8 +178,8 @@ app.post(API_ROOT +'/update/:id?', (req, res) => {
 
 					if (image_data) {
 						// delete prev photo if it exists
-						deletePhoto(req.body.id);
-						savePhoto(image_data, req.body.id);
+						// deletePhoto(req.body.id);
+						savePhoto2(image_data, req.body.id);
 					}
 				}
 
@@ -188,7 +193,7 @@ app.post(API_ROOT +'/update/:id?', (req, res) => {
 			const row = await db.insert(req.body);
 
 			if (image_data && row.insertId) {
-				savePhoto(image_data, row.insertId);
+				savePhoto2(image_data, row.insertId);
 			}
 
 			res.json({
@@ -202,12 +207,24 @@ app.post(API_ROOT +'/update/:id?', (req, res) => {
 
 app.get(API_ROOT +'/delete/:id', (req, res) => {
 	(async () => {
+		const { id } = req.params;
+
 		try {
-			const del = await deletePhoto(req.params.id);
-			const resp = await db.query(`DELETE FROM assets WHERE id=${req.params.id}`);
+			// delete all associated images for this asset
+			const photos = await db.query(`SELECT * FROM photos WHERE asset_id=${id}`);
+			if (photos.length) {
+				photos.forEach(photo => {
+					deletePhoto(photo.id);
+				});
+			}
+
+			const del = await db.query(`DELETE FROM photos WHERE asset_id=${id}`);
+			const resp = await db.query(`DELETE FROM assets WHERE id=${id}`);
 
 			res.json({
 				message: 'Asset deleted.',
+				photosDeleted: del,
+				assetDeleted: resp,
 				result: []
 			});
 
@@ -244,20 +261,56 @@ const savePhoto = (image_data, id) => {
 	});
 }
 
+// save to the new photos table
+const savePhoto2 = (image_data, asset_id) => {
+	if (!asset_id) {
+		log('asset_id required to save photo');
+		return;
+	}
+
+	const [ type, data ] = image_data.split(',');
+	const now = new Date();
+	const dirPath = __dirname +'/files/photos';
+	const fileName = `${asset_id}_${now.getTime()}.jpg`;
+	const filePath = path.join(dirPath, fileName);
+	const buffer = Buffer.from(data, 'base64');
+
+	Jimp.read(buffer, (err, res) => {
+		if (err) throw new Error(err);
+		res
+			.contain(640, 480)
+			.quality(80)
+			.write(filePath);
+
+		db.insertPhoto({
+			asset_id: asset_id,
+			file: fileName
+		})
+		.then(resp => {
+			db.query(`UPDATE assets SET photo_id=${resp.insertId} WHERE id=${asset_id}`);
+		})
+	});
+}
+
 // get asset data and delete photo file if present
 const deletePhoto = async (id) => {
-	const resp = await db.query(`SELECT * FROM assets WHERE id=${id}`);
+	const resp = await db.query(`SELECT * FROM photos WHERE id=${id}`);
 
-	log(resp);
+	// log(resp);
 
 	// delete associated photo file
-	if (resp && resp.photo) {
+	if (resp && resp.file) {
 		const dirPath = __dirname +'/files/photos';
-		const filePath = path.join(dirPath, resp.photo);
+		const filePath = path.join(dirPath, resp.file);
 
 		fs.unlink(filePath, (err) => {
-			// fail silently
-			log(err);
+			if (err) {
+				// fail silently
+				log(`Failed to delete file ${resp.file}`);
+
+			} else {
+				log(`Deleted file ${resp.file}`);
+			}
 		});
 	}
 }

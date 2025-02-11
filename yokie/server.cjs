@@ -236,8 +236,25 @@ app.get(API_ROOT +'/queue/add', (req, res) => {
 	res.json({ ok: true });
 });
 
-app.get(API_ROOT +'/queue/remove', (req, res) => {
-	res.json({ ok: true });
+app.post(API_ROOT +'/queue/remove', (req, res) => {
+	(async () => {
+		const { id } = req.params;
+		console.log(req); return;
+		const row = await db.delete(id);
+
+		let message = '';
+
+		// todo: this isn't valid
+		if (row && row.ok) {
+			message = 'Queue slot deleted.';
+		}
+
+		res.json({
+			ok: message ? true : false,
+			message: message,
+			response: row.response
+		});
+	})();
 });
 
 log('Yokie Server is available.');

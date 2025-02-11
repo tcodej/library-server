@@ -82,6 +82,27 @@ exports.insert = async (data) => {
 	return resp;
 }
 
+exports.insertPhoto = async (data) => {
+	const db = await openConnection();
+	let resp = {};
+	let inserts = [];
+	let values = []
+	let sql = 'INSERT INTO photos ';
+
+	for (const [key, value] of Object.entries(data)) {
+		inserts.push(key);
+		values.push(`'${utils.addSlashes(value)}'`);
+	}
+
+	sql += `(${inserts.join(', ')}) VALUES (${values.join(', ')})`;
+
+	const statement = db.format(sql);
+	[resp] = await db.execute(statement);
+	await db.end();
+
+	return resp;
+}
+
 exports.delete = async (id) => {
 	
 }
