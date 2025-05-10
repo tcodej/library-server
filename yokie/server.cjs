@@ -9,6 +9,11 @@ const app = express();
 const { PROTOCOL, PORT, CDG_PATH } = process.env;
 const API_ROOT = '';
 
+// queue statuses
+const STATUS_QUEUED = 0;
+const STATUS_PLAYING = 1;
+const STATUS_COMPLETE = 2;
+
 const log = (str) => {
 	const color = chalk.hex('#E3E700');
 	console.log(color('[Yokie] '+ str));
@@ -206,7 +211,11 @@ app.post(API_ROOT +'/feed/:type', (req, res) => {
 
 app.get(API_ROOT +'/queue/get', (req, res) => {
 	(async () => {
-		const queue = await db.query(`SELECT queue.*, songs.artist, songs.title, songs.path FROM queue LEFT JOIN songs ON queue.song_id=songs.id ORDER BY ordinal ASC`);
+		let queue = await db.query(`SELECT queue.*, songs.artist, songs.title, songs.path FROM queue LEFT JOIN songs ON queue.song_id=songs.id ORDER BY ordinal ASC`);
+
+		if (!Array.isArray(queue)) {
+			queue = [queue];
+		}
 
 		queue.forEach((item) => {
 			if (item.youtube) {
@@ -232,20 +241,35 @@ app.get(API_ROOT +'/queue/get', (req, res) => {
 	})();
 });
 
-app.get(API_ROOT +'/queue/add', (req, res) => {
-	res.json({ ok: true });
+app.post(API_ROOT +'/queue/add', (req, res) => {
+	// todo: add optional singer id
+	console.log(req.body);
+
+	(async () => {
+		if (req.body?.song_id) {
+			const row = await db.insert(req.body);
+
+			res.json({
+				ok: (row?.insertId) ? true : false,
+				message: 'Singer added'
+			});
+
+		} else {
+			res.json({
+				ok: false,
+				message: 'Queue add failed'
+			});
+		}
+	})();
 });
 
 app.post(API_ROOT +'/queue/remove', (req, res) => {
 	(async () => {
-		const { id } = req.params;
-		console.log(req); return;
-		const row = await db.delete(id);
-
+		const { queue_id } = req.body;
+		const row = await db.delete(queue_id);
 		let message = '';
 
-		// todo: this isn't valid
-		if (row && row.ok) {
+		if (row?.ok) {
 			message = 'Queue slot deleted.';
 		}
 
@@ -253,6 +277,54 @@ app.post(API_ROOT +'/queue/remove', (req, res) => {
 			ok: message ? true : false,
 			message: message,
 			response: row.response
+		});
+	})();
+});
+
+app.post(API_ROOT +'/queue/complete', (req, res) => {
+	(async () => {
+		const { queue_id } = req.body;
+
+		// only 1 item can be set as playing
+		// $sql = "UPDATE `queue` SET `status`='". ${STATUS_COMPLETE} ."' WHERE `status`='". ${self::STATUS_PLAYING} ."'; "
+		const row = await db.query(`UPDATE queue SET status='${STATUS_COMPLETE}' WHERE id='${queue_id}'`);
+
+		let message = '';
+
+		if (row?.ok) {
+			message = 'Queue slot updated.';
+		}
+
+		res.json({
+			ok: message ? true : false,
+			message: message,
+			response: row.response
+		});
+	})();
+});
+
+app.post(API_ROOT +'/queue/clear/:type', (req, res) => {
+	(async () => {
+		let sql = '';
+		let message = '';
+
+		switch (req.params.type) {
+			case 'clean':
+				sql = `DELETE FROM queue WHERE status=${STATUS_COMPLETE}`;
+				message = 'Queue cleaned.';
+			break;
+			case 'empty':
+				sql = 'DELETE FROM queue';
+				message = 'Queue emptied.';
+			break;
+		}
+
+		const resp = await db.query(sql);
+
+		res.json({
+			ok: message ? true : false,
+			message: message,
+			response: resp
 		});
 	})();
 });

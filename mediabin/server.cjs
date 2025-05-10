@@ -114,7 +114,7 @@ app.get(API_ROOT +'/discogs/import/:id/:imageOnly?', (req, res) => {
 // return a discogs release or master record
 // type: releases|masters
 app.get(API_ROOT +'/discogs/:type/:id', (req, res) => {
-	const { type, id} = req.params;
+	const { type, id } = req.params;
 	const url = `${discogsAPI}/${type}/${id}?token=${DISCOGS_TOKEN}`;
 
 	(async () => {

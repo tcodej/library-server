@@ -151,6 +151,7 @@ LEFT JOIN photos ON assets.photo_id=photos.id ORDER BY assets.name ASC`;
 		} catch (err) {
 			res.status(500).json({
 				message: 'Database error',
+				error: err,
 				result: []
 			});
 		}
