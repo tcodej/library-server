@@ -35,7 +35,9 @@ exports.query = async (statement, data) => {
 
 	await db.end();
 
-	return rows.length === 1 ? rows[0] : rows;
+	// what does this break?
+	// return rows.length === 1 ? rows[0] : rows;
+	return rows;
 }
 
 exports.update = async (id, data) => {
