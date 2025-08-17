@@ -16,7 +16,7 @@ const { CORS_ORIGINS, PROTOCOL, PORT, MP3_PATH, CDG_PATH } = process.env;
 const API_ROOT = '/api';
 
 app.use(cors({ origin: CORS_ORIGINS.split(',') }));
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '50mb' }));
 app.use(favicon('./favicon.ico'));
 
 app.get('/', (req, res) => {
