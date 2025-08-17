@@ -6,7 +6,8 @@
   "main": "index.cjs",
   "scripts": {
     "dev": "nodemon index.cjs",
-    "prod": "stmux -w always -t 'Library Server Prod' -e ERROR -m beep -M -- [ [ 'nodemon index.cjs' : 'ngrok http --domain=bold-wondrous-midge.ngrok-free.app 52525' ] ]",
+    "prod": "nodemon index.cjs",
+    "ngrok": "stmux -w always -t 'Library Server Prod' -e ERROR -m beep -M -- [ [ 'nodemon index.cjs' : 'ngrok http --domain=bold-wondrous-midge.ngrok-free.app 52525' ] ]",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
