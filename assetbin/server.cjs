@@ -304,19 +304,14 @@ const savePhoto = (image_data, asset_id) => {
 // get asset data and delete photo file if present
 const deletePhoto = async (id) => {
 	const resp = await db.query(`SELECT * FROM photos WHERE id=${id}`);
-
-	log(JSON.stringify(resp));
 	const item = resp[0];
 
 	// delete associated photo file
 	if (item && item.file) {
-		log(`deleting photo ${id}`);
-
 		const del = await db.query(`DELETE FROM photos WHERE id=${id}`);
 
 		const dirPath = __dirname +'/files/photos';
 		const filePath = path.join(dirPath, item.file);
-		log(filePath);
 
 		fs.unlink(filePath, (err) => {
 			if (err) {
