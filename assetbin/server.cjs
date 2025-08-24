@@ -13,7 +13,13 @@ const app = express();
 const ttl = 1440;
 
 // use for debugging
-const disableCache = false;
+const disableCache = true;
+
+// image resize width/height
+const imgSpec = {
+	width: 1280,
+	height: 960
+}
 
 const API_ROOT = '';
 
@@ -180,7 +186,7 @@ app.post(API_ROOT +'/update/:id?', (req, res) => {
 					if (image_data) {
 						// delete prev photo if it exists
 						// deletePhoto(req.body.id);
-						savePhoto2(image_data, req.body.id);
+						savePhoto(image_data, req.body.id);
 					}
 				}
 
@@ -194,7 +200,7 @@ app.post(API_ROOT +'/update/:id?', (req, res) => {
 			const row = await db.insert(req.body);
 
 			if (image_data && row.insertId) {
-				savePhoto2(image_data, row.insertId);
+				savePhoto(image_data, row.insertId);
 			}
 
 			res.json({
@@ -206,7 +212,7 @@ app.post(API_ROOT +'/update/:id?', (req, res) => {
 	})();
 });
 
-app.get(API_ROOT +'/delete/:id', (req, res) => {
+app.post(API_ROOT +'/delete/:id', (req, res) => {
 	(async () => {
 		const { id } = req.params;
 
@@ -239,31 +245,33 @@ app.get(API_ROOT +'/delete/:id', (req, res) => {
 	})();
 });
 
-const savePhoto = (image_data, id) => {
-	if (!id) {
-		log('id required to save photo');
-		return;
-	}
+// delete a specified photo
+app.post(API_ROOT +'/delete-photo/:id', (req, res) => {
+	(async () => {
+		const { id } = req.params;
 
-	const [ type, data ] = image_data.split(',');
-	const now = new Date();
-	const dirPath = __dirname +'/files/photos';
-	const fileName = `${id}_${now.getTime()}.jpg`;
-	const filePath = path.join(dirPath, fileName);
-	const buffer = Buffer.from(data, 'base64');
+		try {
+			// todo: check if an asset is using the photo as the profile pic and reset it first
+			await deletePhoto(id);
 
-	Jimp.read(buffer, (err, res) => {
-		if (err) throw new Error(err);
-		res
-			.contain(640, 480)
-			.quality(80)
-			.write(filePath);
-		db.update(id, { photo: fileName });
-	});
-}
+			res.json({
+				message: 'Photo deleted.',
+				result: []
+			});
+
+		} catch (err) {
+			log(err);
+			res.status(500).json({
+				message: err.sqlMessage || 'Database error',
+				result: []
+			});
+		}
+	})();
+});
+
 
 // save to the new photos table
-const savePhoto2 = (image_data, asset_id) => {
+const savePhoto = (image_data, asset_id) => {
 	if (!asset_id) {
 		log('asset_id required to save photo');
 		return;
@@ -279,7 +287,7 @@ const savePhoto2 = (image_data, asset_id) => {
 	Jimp.read(buffer, (err, res) => {
 		if (err) throw new Error(err);
 		res
-			.contain(640, 480)
+			.contain(imgSpec.width, imgSpec.height)
 			.quality(80)
 			.write(filePath);
 
@@ -297,20 +305,26 @@ const savePhoto2 = (image_data, asset_id) => {
 const deletePhoto = async (id) => {
 	const resp = await db.query(`SELECT * FROM photos WHERE id=${id}`);
 
-	// log(resp);
+	log(JSON.stringify(resp));
+	const item = resp[0];
 
 	// delete associated photo file
-	if (resp && resp.file) {
+	if (item && item.file) {
+		log(`deleting photo ${id}`);
+
+		const del = await db.query(`DELETE FROM photos WHERE id=${id}`);
+
 		const dirPath = __dirname +'/files/photos';
-		const filePath = path.join(dirPath, resp.file);
+		const filePath = path.join(dirPath, item.file);
+		log(filePath);
 
 		fs.unlink(filePath, (err) => {
 			if (err) {
 				// fail silently
-				log(`Failed to delete file ${resp.file}`);
+				log(`Failed to delete file ${item.file}`);
 
 			} else {
-				log(`Deleted file ${resp.file}`);
+				log(`Deleted file ${item.file}`);
 			}
 		});
 	}
