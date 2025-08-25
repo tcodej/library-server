@@ -3,7 +3,7 @@ const mcache = require('memory-cache');
 const chalk = require('chalk');
 const fs = require('fs');
 const path = require('path');
-const Jimp = require('jimp');
+const { Jimp } = require('jimp');
 const db = require('./db.cjs');
 const utils = require('../utils.cjs');
 
@@ -284,21 +284,25 @@ const savePhoto = (image_data, asset_id) => {
 	const filePath = path.join(dirPath, fileName);
 	const buffer = Buffer.from(data, 'base64');
 
-	Jimp.read(buffer, (err, res) => {
-		if (err) throw new Error(err);
-		res
-			.contain(imgSpec.width, imgSpec.height)
+	Jimp.fromBuffer(buffer)
+		.then(image => {
+			log(image);
+
+			image.contain({
+				w: imgSpec.width,
+				h: imgSpec.height
+			})
 			.quality(80)
 			.write(filePath);
 
-		db.insertPhoto({
-			asset_id: asset_id,
-			file: fileName
-		})
-		.then(resp => {
-			db.query(`UPDATE assets SET photo_id=${resp.insertId} WHERE id=${asset_id}`);
-		})
-	});
+			db.insertPhoto({
+				asset_id: asset_id,
+				file: fileName
+			})
+			.then(resp => {
+				db.query(`UPDATE assets SET photo_id=${resp.insertId} WHERE id=${asset_id}`);
+			});
+		});
 }
 
 // get asset data and delete photo file if present
