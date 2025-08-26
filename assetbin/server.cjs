@@ -288,8 +288,6 @@ const savePhoto = (image_data, asset_id) => {
 
 	Jimp.fromBuffer(buffer)
 		.then(image => {
-			log(image);
-
 			image.contain({
 				w: imgSpec.width,
 				h: imgSpec.height
