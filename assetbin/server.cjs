@@ -251,7 +251,9 @@ app.post(API_ROOT +'/delete-photo/:id', (req, res) => {
 		const { id } = req.params;
 
 		try {
-			// todo: check if an asset is using the photo as the profile pic and reset it first
+			// clear any photo_id attached to an asset
+			db.query(`UPDATE assets SET photo_id=NULL WHERE photo_id=${id}`);
+
 			await deletePhoto(id);
 
 			res.json({
@@ -292,7 +294,7 @@ const savePhoto = (image_data, asset_id) => {
 				w: imgSpec.width,
 				h: imgSpec.height
 			})
-			.quality(80)
+			// .quality(80)
 			.write(filePath);
 
 			db.insertPhoto({
