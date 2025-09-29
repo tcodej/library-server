@@ -39,7 +39,7 @@ app.get('/coffee', (req, res) => {
 
 app.get('/.well-known/acme-challenge/:auth', (req, res) => {
 	const { auth } = req.params;
-	res.status(200).send(auth);
+	res.status(200).send(`${auth}.Bag_qBQtFd_KrrnH7qOUo9i-KRX2yvUTaKpWyoOUS2U`);
 });
 
 app.listen(PORT, () => {
