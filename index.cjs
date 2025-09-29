@@ -37,8 +37,9 @@ app.get('/coffee', (req, res) => {
 	res.status(418).send(`I'm a teapot`);
 });
 
-app.get('/.well-known/acme-challenge/*', (req, res) => {
-	res.status(200).send('ok');
+app.get('/.well-known/acme-challenge/:auth', (req, res) => {
+	const { auth } = req.params;
+	res.status(200).send(auth);
 });
 
 app.listen(PORT, () => {
