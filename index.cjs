@@ -37,6 +37,10 @@ app.get('/coffee', (req, res) => {
 	res.status(418).send(`I'm a teapot`);
 });
 
+app.get('/.well-known/acme-challenge/*', (req, res) => {
+	res.status(200).send('ok');
+});
+
 app.listen(PORT, () => {
 	console.log(`Library Server listening at ${PROTOCOL}://localhost:${PORT}`);
 });
