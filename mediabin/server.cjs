@@ -274,11 +274,10 @@ app.post(API_ROOT +'/delete/:id', (req, res) => {
 		const { id } = req.params;
 
 		try {
-			// get item first so we have the cover filename
-			const media = await db.query(`SELECT * FROM media WHERE id=${id}`);
+			const item = await getMediaItem(id);
 
-			if (media?.cover) {
-				const respCover = await deleteCover(media.cover);
+			if (item?.cover) {
+				const respCover = await deleteCover(item.cover);
 			}
 
 			const resp = await db.query(`DELETE FROM media WHERE id=${id}`);
