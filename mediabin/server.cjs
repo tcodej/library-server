@@ -269,6 +269,36 @@ app.post(API_ROOT +'/updateWantlist/:id', (req, res) => {
 	});
 });
 
+app.post(API_ROOT +'/delete/:id', (req, res) => {
+	(async () => {
+		const { id } = req.params;
+
+		try {
+			// get item first so we have the cover filename
+			const media = await db.query(`SELECT * FROM media WHERE id=${id}`);
+
+			if (media?.cover) {
+				const respCover = await deleteCover(media.cover);
+			}
+
+			const resp = await db.query(`DELETE FROM media WHERE id=${id}`);
+
+			res.json({
+				message: 'Media deleted.',
+				response: resp,
+				result: []
+			});
+
+		} catch (err) {
+			log(err);
+			res.status(500).json({
+				message: err.sqlMessage || 'Database error',
+				result: []
+			});
+		}
+	})();
+});
+
 
 log('MediaBin Server is available.');
 log(`Cache is ${disableCache ? 'disabled' : 'enabled'}`);
@@ -325,6 +355,22 @@ const saveCover = (release, forceSave) => {
 	} else {
 		log('No release_id');
 	}
+}
+
+const deleteCover = async (fileName) => {
+	log(fileName);
+	const dirPath = __dirname +'/files/covers';
+	const filePath = path.join(dirPath, fileName);
+
+	fs.unlink(filePath, (err) => {
+		if (err) {
+			// fail silently
+			log(`Failed to delete file ${fileName}`);
+
+		} else {
+			log(`Deleted file ${fileName}`);
+		}
+	});
 }
 
 const saveRelease = async (release) => {
