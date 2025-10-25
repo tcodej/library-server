@@ -298,6 +298,34 @@ app.post(API_ROOT +'/delete/:id', (req, res) => {
 	})();
 });
 
+app.post(API_ROOT +'/verify/:id', (req, res) => {
+	(async () => {
+		const { id } = req.params;
+
+		try {
+			db.update(id, { date_verified: now() }).then(row => {
+				let message = '';
+
+				if (row) {
+					message = 'Verified.';
+				}
+
+				res.json({
+					message: message,
+					result: row
+				});
+			});
+
+		} catch (err) {
+			log(err);
+			res.status(500).json({
+				message: err.sqlMessage || 'Database error',
+				result: []
+			});
+		}
+	})();
+});
+
 
 log('MediaBin Server is available.');
 log(`Cache is ${disableCache ? 'disabled' : 'enabled'}`);
@@ -416,6 +444,20 @@ const updateMedia = async (release) => {
 const getMediaItem = async (release_id) => {
 	const mediaItem = await db.query(`SELECT * FROM media WHERE release_id=${release_id} LIMIT 1`);
 	return mediaItem;
+}
+
+// formad current date as a TIMESTAMP field value
+const now = () => {
+	let date = new Date();
+
+	date = date.getUTCFullYear() + '-' +
+		('00' + (date.getUTCMonth()+1)).slice(-2) +'-'+
+		('00' + date.getUTCDate()).slice(-2) +' '+ 
+		('00' + date.getUTCHours()).slice(-2) +':'+ 
+		('00' + date.getUTCMinutes()).slice(-2) +':'+ 
+		('00' + date.getUTCSeconds()).slice(-2);
+
+	return date;
 }
 
 module.exports = app;
