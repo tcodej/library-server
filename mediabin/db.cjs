@@ -69,7 +69,14 @@ exports.insert = async (data) => {
 
 	for (const [key, value] of Object.entries(data)) {
 		inserts.push(key);
-		values.push(`'${value}'`);
+		let newValue = value;
+
+		// remove any non ansii chars like ⅓ that the db doesn't like
+		if (typeof value === 'string') {
+			newValue = value.replace(/[^\x00-\x7F]/g, '');
+		}
+
+		values.push(`'${newValue}'`);
 	}
 
 	sql += `(${inserts.join(', ')}) VALUES (${values.join(', ')})`;
