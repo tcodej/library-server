@@ -77,8 +77,8 @@ app.get(API_ROOT +'/discogs/collection/:page', (req, res) => {
 
 // load a discogs release by id and import it
 // it does not check if the release already exists...
-app.get(API_ROOT +'/discogs/import/:id/:imageOnly?', (req, res) => {
-	const { id, imageOnly } = req.params;
+app.get(API_ROOT +'/discogs/import/:id/:type?', (req, res) => {
+	const { id, type } = req.params;
 	const url = `${discogsAPI}/releases/${id}?token=${DISCOGS_TOKEN}`;
 
 	(async () => {
@@ -90,16 +90,21 @@ app.get(API_ROOT +'/discogs/import/:id/:imageOnly?', (req, res) => {
 		const resp = await response.json();
 		let message = '';
 
-		if (!imageOnly) {
+		if (!type) {
 			const row = await saveRelease(resp);
 			saveCover(resp);
 
 			if (row && row.ok) {
 				message = 'Release saved.';
 			}
-		} else {
+
+		} else if (type === 'image') {
 			saveCover(resp, true);
 			message = 'Cover image saved.';
+
+		} else if (type === 'preview') {
+			// return discogs data without saving to the database
+			console.log(resp);
 		}
 
 		res.json({
