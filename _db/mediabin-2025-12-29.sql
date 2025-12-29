@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS `collections` (
   `id` tinyint(3) unsigned NOT NULL AUTO_INCREMENT,
   `label` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table mediabin.collections: ~8 rows (approximately)
 REPLACE INTO `collections` (`id`, `label`) VALUES
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS `media` (
   `wantlist` char(1) DEFAULT '0',
   `date_verified` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1463 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1463 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table mediabin.media: ~1,374 rows (approximately)
 REPLACE INTO `media` (`id`, `artist`, `cover`, `title`, `released`, `label`, `release_id`, `format`, `catalog_number`, `notes`, `collection_id`, `source`, `date_created`, `date_modified`, `wantlist`, `date_verified`) VALUES

@@ -72,9 +72,10 @@ exports.insert = async (data) => {
 		let newValue = value;
 
 		// remove any non ansii chars like ⅓ that the db doesn't like
-		if (typeof value === 'string') {
-			newValue = value.replace(/[^\x00-\x7F]/g, '');
-		}
+		// 2025-12-29 updated the db charset to accept more characters
+		// if (typeof value === 'string') {
+		// 	newValue = value.replace(/[^\x00-\x7F]/g, '');
+		// }
 
 		values.push(`'${newValue}'`);
 	}
