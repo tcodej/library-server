@@ -16,6 +16,21 @@ const openConnection = async () => {
 	return db;
 }
 
+const addSlashes = (str) => {
+	if (!str) {
+		return '';
+	}
+
+	return str.replace(/\\/g, '\\\\')
+		.replace(/\u0008/g, '\\b')
+		.replace(/\t/g, '\\t')
+		.replace(/\n/g, '\\n')
+		.replace(/\f/g, '\\f')
+		.replace(/\r/g, '\\r')
+		.replace(/'/g, '\\\'')
+		.replace(/"/g, '\\"');
+}
+
 exports.query = async (statement, data) => {
 	const db = await openConnection();
 	let rows = [];
@@ -43,10 +58,8 @@ exports.update = async (id, data) => {
 	let updates = [];
 
 	for (const [key, value] of Object.entries(data)) {
-		updates.push(`${key}='${value}'`);
+		updates.push(`${key}='${addSlashes(value)}'`);
 	}
-
-	console.log(id, data);
 
 	const sql = db.format(`UPDATE media SET ${updates.join(',')} WHERE id=${id}`);
 
