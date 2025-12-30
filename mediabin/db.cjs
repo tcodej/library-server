@@ -46,6 +46,8 @@ exports.update = async (id, data) => {
 		updates.push(`${key}='${value}'`);
 	}
 
+	console.log(id, data);
+
 	const sql = db.format(`UPDATE media SET ${updates.join(',')} WHERE id=${id}`);
 
 	if (id) {

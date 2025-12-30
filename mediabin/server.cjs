@@ -240,7 +240,7 @@ app.get(API_ROOT +'/feed/:type/:id?', cache(ttl), (req, res) => {
 	})();
 });
 
-app.post(API_ROOT +'/updateReleaseCollection/:id', (req, res) => {
+app.post(API_ROOT +'/updateMedia/:id', (req, res) => {
 	getMediaItem(req.params.id).then(item => {
 		db.update(item.id, req.body).then(row => {
 			let message = '';
