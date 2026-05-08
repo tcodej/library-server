@@ -244,10 +244,23 @@ app.get(API_ROOT +'/queue/get', (req, res) => {
 app.post(API_ROOT +'/queue/add', (req, res) => {
 	// todo: add optional singer id
 	console.log(req.body);
+	let data = req.body;
+
+	data.mobile = data.mobile ? 1 : 0;
+	data.youtube = data.youtube ? 1 : 0;
 
 	(async () => {
-		if (req.body?.song_id) {
-			const row = await db.insert(req.body);
+		if (data.song_id) {
+			const row = await db.insert(data);
+
+			res.json({
+				ok: (row?.insertId) ? true : false,
+				message: 'Singer added'
+			});
+
+		} else if (data.youtube) {
+			console.log('youtube...');
+			const row = await db.insert(data);
 
 			res.json({
 				ok: (row?.insertId) ? true : false,
