@@ -15,8 +15,16 @@ const app = express();
 
 const { CORS_ORIGINS, PROTOCOL, PORT, MP3_PATH, CDG_PATH } = process.env;
 const API_ROOT = '/api';
+const corsOptions = {
+  origin: CORS_ORIGINS.split(','),
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  // allowedHeaders: ['Content-Type', 'Authorization'],
+  // credentials: true,
+};
 
 app.use(cors({ origin: CORS_ORIGINS.split(',') }));
+app.options('*', cors(corsOptions));
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({
   limit: '50mb',
