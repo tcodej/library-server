@@ -55,11 +55,11 @@ app.get(API_ROOT +'/feed/:type/:id?', (req, res) => {
 
 // if id is present, it's an update, otherwise insert a new row
 app.post(API_ROOT +'/update/:id?', (req, res) => {
-	// log('--- update', req.body);
+	const data = JSON.stringify(req.body);
 
 	(async () => {
-		if (req.body.id) {
-			db.update(req.body.id, req.body).then(row => {
+		if (req.params.id) {
+			db.update(req.params.id, data).then(row => {
 				let message = '';
 
 				if (row) {
@@ -73,7 +73,7 @@ app.post(API_ROOT +'/update/:id?', (req, res) => {
 			});
 
 		} else {
-			const row = await db.insert(req.body);
+			const row = await db.insert(data);
 
 			res.json({
 				ok: (row && row.insertId) ? true : false,

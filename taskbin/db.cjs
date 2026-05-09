@@ -41,13 +41,8 @@ exports.query = async (statement, data) => {
 exports.update = async (id, data) => {
     const db = await openConnection();
     let rows = [];
-    let updates = [];
 
-    for (const [key, value] of Object.entries(data)) {
-        updates.push(`${key}='${utils.addSlashes(value)}'`);
-    }
-
-    const sql = db.format(`UPDATE lists SET ${updates.join(',')} WHERE id=${id}`);
+    const sql = db.format(`UPDATE lists SET data='${data}' WHERE id=${id}`);
 
     if (id) {
         [rows] = await db.execute(sql);
