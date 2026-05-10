@@ -15,23 +15,19 @@ app.get('/', (req, res) => {
 });
 
 // id is only used for type release or category
-app.get(API_ROOT +'/feed/:type/:id?', (req, res) => {
+app.get(API_ROOT +'/lists/:id?', (req, res) => {
 	let sql = '';
 	let msg = '';
 	const select = 'SELECT * FROM lists';
 
 	(async () => {
-		switch (req.params.type) {
-			// message by database id
-			case 'message':
-				sql = `${select} WHERE id=${req.params.id}`;
-				msg = 'List loaded';
-			break;
-			// all lists
-			case 'lists':
-				sql = select;
-				msg = 'Lists loaded.';
-			break;
+		if (req.params.id) {
+			sql = `${select} WHERE id=${req.params.id}`;
+			msg = 'List loaded';
+
+		} else {
+			sql = select;
+			msg = 'Lists loaded.';
 		}
 
 		try {

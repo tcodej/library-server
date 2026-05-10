@@ -38,6 +38,11 @@ app.get('/', (req, res) => {
 	res.send('Library Server v1.0');
 });
 
+app.get('/robots.txt', (req, res) => {
+	res.type('text/plain');
+	res.send("User-agent: *\nDisallow: /");
+});
+
 app.get('/healthcheck', (req, res) => {
 	res.send({ message: 'I LIVE' });
 });

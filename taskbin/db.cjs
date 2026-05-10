@@ -42,7 +42,7 @@ exports.update = async (id, data) => {
     const db = await openConnection();
     let rows = [];
 
-    const sql = db.format(`UPDATE lists SET data='${data}' WHERE id=${id}`);
+    const sql = db.format(`UPDATE lists SET data='${utils.addSlashes(data)}' WHERE id=${id}`);
 
     if (id) {
         [rows] = await db.execute(sql);
@@ -59,16 +59,9 @@ exports.update = async (id, data) => {
 exports.insert = async (data) => {
     const db = await openConnection();
     let resp = {};
-    let inserts = [];
-    let values = []
     let sql = 'INSERT INTO lists ';
 
-    for (const [key, value] of Object.entries(data)) {
-        inserts.push(key);
-        values.push(`'${utils.addSlashes(value)}'`);
-    }
-
-    sql += `(${inserts.join(', ')}) VALUES (${values.join(', ')})`;
+    sql += `(data) VALUES ('${utils.addSlashes(data)}')`;
 
     const statement = db.format(sql);
     [resp] = await db.execute(statement);
