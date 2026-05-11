@@ -22,7 +22,7 @@ const corsOptions = {
   // credentials: true,
 };
 
-app.use(cors({ origin: CORS_ORIGINS.split(',') }));
+app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 
 app.use(express.json({ limit: '50mb' }));
