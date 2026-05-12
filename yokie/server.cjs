@@ -230,7 +230,7 @@ app.get(API_ROOT +'/queue/get', (req, res) => {
 					artist: item.artist,
 					title: item.title,
 					// todo: let the front-end format this
-					path: `${PROTOCOL}://${req.hostname}:${PORT}${API_ROOT}/api/yokie/cdg/`+ item.path
+					path: `${PROTOCOL}://${req.hostname}${API_ROOT}/api/yokie/cdg/`+ item.path
 				}
 			}
 		});

@@ -7,7 +7,6 @@ const chalk = require('chalk');
 const app = express();
 
 // requires dotenv in index.cjs to populate this
-const { PROTOCOL, PORT } = process.env;
 const API_ROOT = '';
 
 const log = (str) => {
