@@ -257,6 +257,21 @@ app.post(API_ROOT +'/updateMedia/:id', (req, res) => {
 	});
 });
 
+app.post(API_ROOT +'/updateField/:id', (req, res) => {
+	db.update(req.params.id, req.body).then(row => {
+		let message = '';
+
+		if (row) {
+			message = 'Release saved.';
+		}
+
+		res.json({
+			message: message,
+			result: row
+		});
+	});
+});
+
 app.post(API_ROOT +'/updateWantlist/:id', (req, res) => {
 	getMediaItem(req.params.id).then(item => {
 		db.update(item.id, req.body).then(row => {
