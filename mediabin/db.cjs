@@ -21,6 +21,10 @@ const addSlashes = (str) => {
 		return '';
 	}
 
+	if (typeof str !== 'string') {
+		return str;
+	}
+
 	return str.replace(/\\/g, '\\\\')
 		.replace(/\u0008/g, '\\b')
 		.replace(/\t/g, '\\t')
