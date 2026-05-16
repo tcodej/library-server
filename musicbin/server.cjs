@@ -5,10 +5,12 @@ const mcache = require('memory-cache');
 const chalk = require('chalk');
 
 let mm;
+let imgTools;
 
 (async () => {
 	mm = await import('music-metadata');
-})(mm);
+	imgTools = await import('uint8array-extras');
+})(mm, imgTools);
 
 // const mm = require('music-metadata');
 
@@ -316,10 +318,12 @@ const getMeta = async (pathReq, subset) => {
 		if (isMusicFile(filePath)) {
 			let { common } = await mm.parseFile(filePath);
 
+			console.log(common);
+
 			if (common.picture && common.picture[0]) {
 				const picture = common.picture[0];
-
-				common.image = `data:${picture.format};base64,${picture.data.toString('base64')}`;
+				common.image = `data:${picture.format};base64,${imgTools.uint8ArrayToBase64(picture.data)}`;
+				// common.image = `data:${picture.format};base64,${picture.data.toString('base64')}`;
 				delete common.picture;
 			}
 
