@@ -318,8 +318,6 @@ const getMeta = async (pathReq, subset) => {
 		if (isMusicFile(filePath)) {
 			let { common } = await mm.parseFile(filePath);
 
-			console.log(common);
-
 			if (common.picture && common.picture[0]) {
 				const picture = common.picture[0];
 				common.image = `data:${picture.format};base64,${imgTools.uint8ArrayToBase64(picture.data)}`;
