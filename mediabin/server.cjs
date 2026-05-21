@@ -142,7 +142,8 @@ app.get(API_ROOT +'/discogs/:type/:id', (req, res) => {
 			resp = {
 				ok: false,
 				error: true,
-				message: `Discogs ${type} API failed`
+				message: `Discogs ${type} API failed`,
+				err: err
 			}
 		}
 

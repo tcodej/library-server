@@ -64,9 +64,10 @@ exports.update = async (id, data) => {
 	for (const [key, value] of Object.entries(data)) {
 		if (typeof value === 'string') {
 			updates.push(`${key}='${addSlashes(value)}'`);
-		}
 
-		updates.push(`${key}=${value}`);
+		} else {
+			updates.push(`${key}=${value}`);
+		}
 	}
 
 	const sql = db.format(`UPDATE media SET ${updates.join(',')} WHERE id=${id}`);
