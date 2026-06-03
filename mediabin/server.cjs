@@ -104,7 +104,7 @@ app.get(API_ROOT +'/discogs/import/:id/:type?', (req, res) => {
 
 		} else if (type === 'preview') {
 			// return discogs data without saving to the database
-			console.log(resp);
+			// console.log(resp);
 		}
 
 		res.json({
@@ -197,7 +197,7 @@ app.get(API_ROOT +'/feed/:type/:id?', cache(ttl), (req, res) => {
 	let sql = '';
 	let msg = '';
 	const select = 'SELECT * FROM media';
-	const orderBy = 'ORDER BY artist ASC, released ASC, title ASC';
+	const orderBy = 'ORDER BY artist ASC, released_sort ASC, released ASC, title ASC';
 	const notwantlist = 'wantlist=0';
 
 	(async () => {
