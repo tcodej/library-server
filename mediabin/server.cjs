@@ -469,7 +469,7 @@ const getMediaItem = async (release_id) => {
 	return mediaItem;
 }
 
-// formad current date as a TIMESTAMP field value
+// format current date as a TIMESTAMP field value
 const now = () => {
 	let date = new Date();
 
