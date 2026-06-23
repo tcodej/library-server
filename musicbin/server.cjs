@@ -116,7 +116,6 @@ app.get(API_ROOT +'/browse/*', cache(ttl), (req, res) => {
 			if (pathReq && result.folders.length > 0) {
 				for await (const album of result.folders) {
 					const fileList = fs.readdirSync(p.join(MP3_PATH, pathReq, album));
-					let found = false;
 					let cover = '';
 
 					// look for the first valid music file to grab meta data from
@@ -124,7 +123,6 @@ app.get(API_ROOT +'/browse/*', cache(ttl), (req, res) => {
 						// cover.jpg or folder.jpg - only supported folders with no music files
 						if (['cover.jpg', 'folder.jpg'].includes(fileList[i])) {
 							cover = getURL(req, p.join(pathReq, album, fileList[i]));
-							found = true;
 
 							result.albums.push({
 								isFolder: true,
@@ -142,7 +140,6 @@ app.get(API_ROOT +'/browse/*', cache(ttl), (req, res) => {
 									result.albums.push(meta);
 								}
 
-								found = true;
 								break;
 							}
 						}
