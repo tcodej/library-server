@@ -3,6 +3,7 @@ const fs = require('fs');
 const p = require('path');
 const mcache = require('memory-cache');
 const chalk = require('chalk');
+const readline = require('readline');
 
 let mm;
 let imgTools;
@@ -24,7 +25,7 @@ const ttl = 300;
 const disableCache = false;
 
 // requires dotenv in index.cjs to populate this
-const { MP3_PATH, CDG_PATH, PROTOCOL, HOST } = process.env;
+const { MP3_PATH, PROTOCOL } = process.env;
 
 const log = (str) => {
 	const color = chalk.hex('#2776FF');
@@ -284,6 +285,42 @@ app.get(API_ROOT +'/random/tracks/:num', (req, res) => {
 			path: '',
 			albums: [],
 			files: shuffle(files).slice(0, req.params.num)
+		});
+	})();
+});
+
+// search a static file list and return results
+// todo: could utilize this to randomize tracks
+app.get(API_ROOT +'/search/:query', (req, res) => {
+	(async () => {
+		let message;
+		const matches = [];
+
+		try {
+			const fileStream = fs.createReadStream(`${MP3_PATH}/list.txt`);
+
+			const rl = readline.createInterface({
+				input: fileStream,
+				crlfDelay: Infinity
+			});
+
+			for await (const line of rl) {
+				if (line.toLowerCase().includes(req.params.query.toLowerCase())) {
+					matches.push(line);
+				}
+			}
+
+			message = `Found ${matches.length} matches for '${req.params.query}'`;
+
+		} catch(err) {
+			message = err.toString();
+		}
+
+		res.json({
+			message: message,
+			path: '',
+			albums: [],
+			result: matches
 		});
 	})();
 });
