@@ -2,6 +2,7 @@ const dotenv = require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const favicon = require('serve-favicon');
+const os = require('os');
 
 const musicbin = require('./musicbin/server.cjs');
 const mediabin = require('./mediabin/server.cjs');
@@ -56,10 +57,30 @@ app.get('/.well-known/acme-challenge/:auth', (req, res) => {
 	res.status(200).send(`${auth}.Bag_qBQtFd_KrrnH7qOUo9i-KRX2yvUTaKpWyoOUS2U`);
 });
 
+app.get('/mac', (req, res) => {
+	const networkInterfaces = os.networkInterfaces();
+	let macAddress = null;
+
+	// Loop through network interfaces to find a valid MAC address
+	for (const interfaceName in networkInterfaces) {
+	    const interfaces = networkInterfaces[interfaceName];
+	    for (const iface of interfaces) {
+	        // Skip internal (loopback) and virtual addresses
+	        if (!iface.internal && iface.mac && iface.mac !== '00:00:00:00:00:00') {
+	            macAddress = iface.mac;
+	            break;
+	        }
+	    }
+	    if (macAddress) break;
+	}
+
+	console.log('Server MAC Address:', macAddress);
+	res.status(200).send(macAddress);
+});
+
 app.listen(PORT, () => {
 	console.log(`Library Server listening at ${PROTOCOL}://localhost:${PORT}`);
 });
-
 
 
 
