@@ -86,7 +86,8 @@ app.get(API_ROOT +'/browse/*', cache(ttl), (req, res) => {
 			folders: [],
 			albums: [],
 			files: [],
-			unsupported: []
+			unsupported: [],
+			cover: false,
 		}
 
 		list.forEach((item) => {
@@ -96,6 +97,9 @@ app.get(API_ROOT +'/browse/*', cache(ttl), (req, res) => {
 			} else {
 				if (isMusicFile(item)) {
 					result.files.push(item);
+
+				} else if (['cover.jpg', 'folder.jpg'].includes(item)) {
+					result.cover = item;
 
 				} else {
 					result.unsupported.push(item);
@@ -109,6 +113,16 @@ app.get(API_ROOT +'/browse/*', cache(ttl), (req, res) => {
 				const meta = await getMeta(p.join(result.path, result.files[0]), true);
 
 				if (meta.ok) {
+					// if a cover image is present, use folder info instead of meta from first file
+					if (result.cover) {
+						meta.image = getURL(req, p.join(pathReq, result.cover));
+						meta.album = result.path.split('/').pop();
+
+						if (meta.albumartist) {
+							meta.artist = meta.albumartist;
+						}
+					}
+
 					result.meta = meta;
 				}
 			}
@@ -137,7 +151,10 @@ app.get(API_ROOT +'/browse/*', cache(ttl), (req, res) => {
 								const meta = await getMeta(p.join(pathReq, album, fileList[i]), true);
 
 								if (meta.ok) {
+									// use the folder name as album
+									meta.album = album;
 									meta.path = p.join(pathReq, album);
+
 									result.albums.push(meta);
 								}
 
@@ -362,6 +379,7 @@ const getMeta = async (pathReq, subset) => {
 			if (subset === true) {
 				const albumMeta = {
 					artist: common.artist,
+					albumartist: common.albumartist,
 					album: common.album,
 					year: common.year,
 					image: common.image,
