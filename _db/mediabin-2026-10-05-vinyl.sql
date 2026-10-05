@@ -20,6 +20,7 @@ CREATE DATABASE IF NOT EXISTS `mediabin` /*!40100 DEFAULT CHARACTER SET utf8mb4 
 USE `mediabin`;
 
 -- Dumping structure for table mediabin.collections
+DROP TABLE IF EXISTS `collections`;
 CREATE TABLE IF NOT EXISTS `collections` (
   `id` tinyint(3) unsigned NOT NULL AUTO_INCREMENT,
   `label` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
@@ -38,6 +39,7 @@ INSERT INTO `collections` (`id`, `label`) VALUES
 	(8, '- Purge');
 
 -- Dumping structure for table mediabin.media
+DROP TABLE IF EXISTS `media`;
 CREATE TABLE IF NOT EXISTS `media` (
   `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
   `artist` varchar(256) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
@@ -60,7 +62,7 @@ CREATE TABLE IF NOT EXISTS `media` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1543 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
--- Dumping data for table mediabin.media: ~1,412 rows (approximately)
+-- Dumping data for table mediabin.media: ~1,433 rows (approximately)
 INSERT INTO `media` (`id`, `artist`, `cover`, `title`, `released`, `released_sort`, `label`, `release_id`, `format`, `catalog_number`, `notes`, `collection_id`, `source`, `wantlist`, `digital`, `date_created`, `date_modified`, `date_verified`) VALUES
 	(1, 'Steve Burns', '871172.jpg', 'Songs For Dust Mites', '2003', '2003', '[PIAS] America', '871172', 'CD, Album, Dig', 'PIASA 23', '', NULL, 'discogs', 0, 1, '2021-01-02 05:27:32', '2026-06-03 17:58:05', '2025-12-10 12:18:16'),
 	(2, 'The Cure', '3286500.jpg', 'Bestival Live 2011', '2011-12-02', '2011-12-02', '[PIAS] America, Sunday Best Recordings, Lost Music', '3286500', '2xCD, Album', 'PIASA51CD', 'Bought new at Music Millennium 2024-02-03', 1, 'discogs', 0, 1, '2024-02-04 01:52:33', '2026-06-03 17:58:05', '2026-03-11 07:34:31'),
