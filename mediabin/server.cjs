@@ -375,7 +375,7 @@ const saveCover = (release, forceSave) => {
 	const filePath = path.join(dirPath, fileName);
 
 	if (release.images && release.images.length > 0) {
-		imageURL = release.images[0].uri150;
+		imageURL = release.images[0].uri;
 	}
 
 	if (release.id) {
