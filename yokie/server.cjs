@@ -200,10 +200,26 @@ app.post(API_ROOT +'/feed/:type', (req, res) => {
 		}
 
 		const resp = await db.query(sql, data);
+		const singers = [];
+
+		if (req.params.type === 'singers' && req.body.detailed) {
+			for (const singer of resp) {
+				const log = await db.query(`SELECT queue_log.name, songs.*, queue_log.created, COUNT(*) AS count FROM queue_log, songs WHERE queue_log.song_id = songs.id and queue_log.singer_id=${singer.id} GROUP BY queue_log.name, songs.title ORDER BY queue_log.singer_id ASC, count DESC;`);
+				singer.songs = log.length;
+				let performances = 0;
+
+				log.forEach(item => {
+					performances += item.count;
+				});
+
+				singer.performances = performances;
+				singers.push(singer);
+			}
+		}
 
 		res.json({
 			message: msg,
-			result: resp,
+			result: singers.length ? singers : resp,
 			total: resp.length
 		});
 	})();
