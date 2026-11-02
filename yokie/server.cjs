@@ -124,7 +124,7 @@ app.post(API_ROOT +'/search', (req, res) => {
 	})();
 });
 
-app.post(API_ROOT +'/feed/:type', (req, res) => {
+app.get(API_ROOT +'/feed/:type', (req, res) => {
 	let sql = '';
 	let msg = '';
 	let data = '';
@@ -139,7 +139,7 @@ app.post(API_ROOT +'/feed/:type', (req, res) => {
 
 			// Returns a list of songs and stats based on a singer id
 			case 'singer-log':
-				sql = `SELECT queue_log.name, queue_log.type, songs.*, queue_log.created, COUNT(*) AS count FROM queue_log, songs WHERE queue_log.song_id = songs.id and queue_log.singer_id = ? GROUP BY queue_log.name, songs.title ORDER BY queue_log.singer_id ASC, count DESC`;
+				sql = `SELECT queue_log.name, queue_log.type, songs.*, queue_log.created, COUNT(*) AS count FROM queue_log, songs WHERE queue_log.song_id=songs.id and queue_log.singer_id=? GROUP BY songs.title ORDER BY songs.title ASC`;
 				data = [req.body.id];
 				msg = 'Singers loaded.';
 			break;
