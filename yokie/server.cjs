@@ -205,7 +205,8 @@ app.post(API_ROOT +'/feed/:type', (req, res) => {
     try {
       if (req.params.type === 'singers' && req.body.detailed) {
        for (const singer of resp) {
-         const log = await db.query(`SELECT queue_log.name, songs.*, queue_log.created, COUNT(*) AS count FROM queue_log, songs WHERE queue_log.song_id = songs.id and queue_log.singer_id=${singer.id} GROUP BY queue_log.name, songs.title ORDER BY queue_log.singer_id ASC, count DESC;`);
+         // const log = await db.query(`SELECT queue_log.name, songs.*, queue_log.created, COUNT(*) AS count FROM queue_log, songs WHERE queue_log.song_id = songs.id and queue_log.singer_id=${singer.id} GROUP BY queue_log.name, songs.title ORDER BY queue_log.singer_id ASC, count DESC;`);
+         const log = await db.query(`SELECT songs.*, queue_log.created, COUNT(*) AS count FROM queue_log, songs WHERE queue_log.song_id = songs.id and queue_log.singer_id=${singer.id} GROUP BY songs.title ORDER BY queue_log.singer_id ASC, count DESC;`);
          singer.songs = log.length;
          let performances = 0;
 
