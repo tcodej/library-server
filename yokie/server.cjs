@@ -139,7 +139,7 @@ app.post(API_ROOT +'/feed/:type', (req, res) => {
 
       // Returns a list of songs and stats based on a singer id
       case 'singer-log':
-        sql = `SELECT queue_log.name, queue_log.type, songs.*, queue_log.created, COUNT(*) AS count FROM queue_log, songs WHERE queue_log.song_id=songs.id and queue_log.singer_id=? GROUP BY songs.title ORDER BY songs.title ASC`;
+        sql = `SELECT songs.*, COUNT(*) AS count FROM queue_log, songs WHERE queue_log.song_id=songs.id and queue_log.singer_id=? GROUP BY songs.title ORDER BY count DESC;`;
         data = [req.body.id];
         msg = 'Singers loaded.';
       break;
@@ -205,8 +205,7 @@ app.post(API_ROOT +'/feed/:type', (req, res) => {
     try {
       if (req.params.type === 'singers' && req.body.detailed) {
        for (const singer of resp) {
-         // const log = await db.query(`SELECT queue_log.name, songs.*, queue_log.created, COUNT(*) AS count FROM queue_log, songs WHERE queue_log.song_id = songs.id and queue_log.singer_id=${singer.id} GROUP BY queue_log.name, songs.title ORDER BY queue_log.singer_id ASC, count DESC;`);
-         const log = await db.query(`SELECT songs.*, queue_log.created, COUNT(*) AS count FROM queue_log, songs WHERE queue_log.song_id = songs.id and queue_log.singer_id=${singer.id} GROUP BY songs.title ORDER BY queue_log.singer_id ASC, count DESC;`);
+        const log = await db.query(`SELECT songs.id, songs.title, COUNT(*) AS count FROM queue_log, songs WHERE queue_log.song_id=songs.id and queue_log.singer_id=${singer.id} GROUP BY songs.title ORDER BY count DESC;`);
          singer.songs = log.length;
          let performances = 0;
 
@@ -218,6 +217,7 @@ app.post(API_ROOT +'/feed/:type', (req, res) => {
          singers.push(singer);
        }
       }
+
     } catch(err) {
       res.json({
         message: err.toString(),
@@ -323,7 +323,6 @@ app.post(API_ROOT +'/queue/complete', (req, res) => {
     const { queue_id } = req.body;
 
     // only 1 item can be set as playing
-    // $sql = "UPDATE `queue` SET `status`='". ${STATUS_COMPLETE} ."' WHERE `status`='". ${self::STATUS_PLAYING} ."'; "
     const row = await db.query(`UPDATE queue SET status='${STATUS_COMPLETE}' WHERE id='${queue_id}'`);
 
     let message = '';
