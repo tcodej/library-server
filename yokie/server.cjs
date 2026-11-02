@@ -124,7 +124,7 @@ app.post(API_ROOT +'/search', (req, res) => {
 	})();
 });
 
-app.get(API_ROOT +'/feed/:type', (req, res) => {
+app.post(API_ROOT +'/feed/:type', (req, res) => {
 	let sql = '';
 	let msg = '';
 	let data = '';
