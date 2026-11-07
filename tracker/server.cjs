@@ -162,7 +162,7 @@ app.get(API_ROOT +'/checkins/get', (req, res) => {
         const json = JSON.parse(data);
 
         json.items.forEach(checkin => {
-          const offset = checkin.timeZoneOffset = -420 ? '00:00' : '01:00';
+          const offset = checkin.timeZoneOffset == -420 ? '01:00' : '00:00';
           const date = new Date(`${checkin.createdAt}-${offset}`);
 
           response.result.push({
