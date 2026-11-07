@@ -162,19 +162,23 @@ app.get(API_ROOT +'/checkins/get', (req, res) => {
         const json = JSON.parse(data);
 
         json.items.forEach(checkin => {
+          const offset = checkin.timeZoneOffset = -420 ? '00:00' : '01:00';
+          const date = new Date(`${checkin.createdAt}-${offset}`);
+
           response.result.push({
             type: checkin.type,
-            date: checkin.createdAt,
+            created: checkin.createdAt,
+            date: date,
             url: checkin.canonicalUrl,
             venue: checkin.venue,
             lat: checkin.lat,
-            lng: checkin.lng
+            lng: checkin.lng,
           });
         });
       }
     });
 
-    sort(response.result, 'date', 'desc');
+    sort(response.result, 'created', 'desc');
     response.total = response.result.length;
     response.message = 'Checkins loaded.';
     res.json(response);
@@ -206,42 +210,40 @@ const saveLocation = async (data) => {
  * Helper function to sort an array of objects by chosen key
  */
 const sort = (arr, key, dir) => {
-    try {
-        arr.sort(function(a, b) {
-            if (key) {
-                a = a[key];
-                b = b[key];
-            }
+  try {
+    arr.sort(function(a, b) {
+      if (key) {
+        a = a[key];
+        b = b[key];
+      }
 
-            if (dir === 'desc') {
-              if (a.toLowerCase() < b.toLowerCase()) {
-                  return 1;
-              }
+      if (dir === 'desc') {
+        if (a.toLowerCase() < b.toLowerCase()) {
+          return 1;
+        }
 
-              if (a.toLowerCase() > b.toLowerCase()) {
-                  return -1;
-              }
+        if (a.toLowerCase() > b.toLowerCase()) {
+          return -1;
+        }
 
-            } else {
-              if (a.toLowerCase() < b.toLowerCase()) {
-                  return -1;
-              }
+      } else {
+        if (a.toLowerCase() < b.toLowerCase()) {
+          return -1;
+        }
 
-              if (a.toLowerCase() > b.toLowerCase()) {
-                  return 1;
-              }
-          }
+        if (a.toLowerCase() > b.toLowerCase()) {
+          return 1;
+        }
+      }
 
-            return 0;
-        });
+      return 0;
+    });
 
-        return arr;
+    return arr;
 
-    } catch (err) {
-        log('sort failed', arr, key);
-    }
+  } catch (err) {
+    log('sort failed', arr, key);
+  }
 }
-
-
 
 module.exports = app;
