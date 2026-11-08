@@ -34,7 +34,7 @@ app.get(API_ROOT +'/locations/:type/:id?', (req, res) => {
         msg = 'Recent location loaded.';
       break;
       case 'notes':
-        sql = `SELECT * FROM locations WHERE note_value IS NOT NULL ORDER BY date DESC`;
+        sql = `SELECT * FROM locations WHERE note_value IS NOT NULL AND note_value <> '' ORDER BY date DESC`;
         msg = 'Locations with notes loaded.';
       break;
       case 'get':
