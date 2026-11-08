@@ -109,22 +109,22 @@ app.post(API_ROOT +'/saveNote', (req, res) => {
   })();
 });
 
-app.get(API_ROOT +'/routes/get', (req, res) => {
+app.get(API_ROOT +'/routes', (req, res) => {
   try {
-    const list = fs.readdirSync(__dirname +'/files/gpx');
+    const files = fs.readdirSync(__dirname +'/files/gpx');
     let response = {
       message: '',
       result: [],
       total: 0
     };
 
-    list.forEach((item) => {
-      const [type, date, time] = item.split('-');
+    files.forEach((file) => {
+      const [type, date, time] = file.split('-');
       // type - date - time - ?
       let data = {
         type: type.toLowerCase(),
         datetime: date.substr(0, 4) +'-'+ date.substr(4, 2) +'-'+ date.substr(6, 2) +'T'+ time.substr(0, 2) +':'+ time.substr(2, 2),
-        file: item
+        file: file
       }
 
       response.result.push(data);
@@ -147,18 +147,18 @@ app.get(API_ROOT +'/routes/get', (req, res) => {
 
 
 // old foursquare/swarm checkins
-app.get(API_ROOT +'/checkins/get', (req, res) => {
+app.get(API_ROOT +'/checkins', (req, res) => {
   try {
-    const list = fs.readdirSync(__dirname +'/files/checkins');
+    const files = fs.readdirSync(__dirname +'/files/checkins');
     let response = {
       message: '',
       result: [],
       total: 0
     };
 
-    list.forEach((item) => {
-      if (item.includes('checkin')) {
-        const data = fs.readFileSync(__dirname +'/files/checkins/'+ item, 'utf8');
+    files.forEach((file) => {
+      if (file.includes('checkin')) {
+        const data = fs.readFileSync(__dirname +'/files/checkins/'+ file, 'utf8');
         const json = JSON.parse(data);
 
         json.items.forEach(checkin => {
@@ -175,6 +175,13 @@ app.get(API_ROOT +'/checkins/get', (req, res) => {
             lng: checkin.lng,
           });
         });
+      }
+
+      if (file.includes('comments')) {
+        const data = fs.readFileSync(__dirname +'/files/checkins/'+ file, 'utf8');
+        const json = JSON.parse(data);
+
+        response.comments = json.items;
       }
     });
 

@@ -15,6 +15,25 @@ const openConnection = async () => {
 	return db;
 }
 
+const addSlashes = (str) => {
+  if (!str) {
+    return '';
+  }
+
+  if (typeof str !== 'string') {
+    return str;
+  }
+
+  return str.replace(/\\/g, '\\\\')
+    .replace(/\u0008/g, '\\b')
+    .replace(/\t/g, '\\t')
+    .replace(/\n/g, '\\n')
+    .replace(/\f/g, '\\f')
+    .replace(/\r/g, '\\r')
+    .replace(/'/g, '\\\'')
+    .replace(/"/g, '\\"');
+}
+
 exports.query = async (statement, data) => {
 	const db = await openConnection();
 	let rows = [];
@@ -40,7 +59,7 @@ exports.query = async (statement, data) => {
 exports.update = async (data) => {
 	const db = await openConnection();
 	let rows = [];
-	const sql = db.format(`UPDATE locations SET note_type='${data.note_type}', note_value='${data.note_value}' WHERE id=${data.id}`);
+	const sql = db.format(`UPDATE locations SET note_type='${data.note_type}', note_value='${addSlashes(data.note_value)}' WHERE id=${data.id}`);
 
 	if (data.id) {
 		[rows] = await db.execute(sql);
@@ -63,6 +82,7 @@ exports.insert = async (data) => {
 
 	for (const [key, value] of Object.entries(data)) {
 		inserts.push(key);
+		// todo: assSlashes?
 		values.push(`'${value}'`);
 	}
 
